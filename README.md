@@ -1,7 +1,10 @@
 # Oxyaudit — Opioid dose audit
 
-A single-purpose, static tool to assist with counting packaged tablets 
-for audit.
+A single-purpose, static tool to assist with counting packaged tablets or capsules
+for audit. Intended for use by Healthcare Professionals. 
+
+Counting trays of 14 can be time-consuming for some people, while accruracy remains importnat.
+This simple tool helps with counting, accurately. 
 
 - Works from a server subfolder (`/oxyaudit/`) and GitHub Pages.
 - No service worker by default. Web App Manifest included.
