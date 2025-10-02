@@ -8,6 +8,10 @@ for audit.
 
 ## Development
 Pure static files. Edit in-place and refresh.
+Please note, this tool is licenced. 
+
+## Coding Comment
+Yes, this has been written by AI (ChatGPT) under human guidance.
 
 ## Licence
 Apache-2.0. See `LICENCE` and `NOTICE`. Contributions require DCO 
