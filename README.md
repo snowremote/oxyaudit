@@ -9,6 +9,9 @@ for audit.
 ## Development
 Pure static files. Edit in-place and refresh.
 
+## Coding
+Yes, ChatGPT has been of great assistance. IMO, the usefulness of the tool is what matters most. 
+
 ## Licence
 Apache-2.0. See `LICENCE` and `NOTICE`. Contributions require DCO 
 sign-off; see `CONTRIBUTING.md`.
