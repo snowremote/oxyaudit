@@ -1,0 +1,9 @@
+# OS/editor
+.DS_Store
+Thumbs.db
+*.swp
+# Build artifacts (if any in future)
+dist/
+/node_modules/
+.DS_Store
+*.log

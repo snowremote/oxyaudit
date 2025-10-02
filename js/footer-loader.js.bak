@@ -1,0 +1,77 @@
+// SPDX-License-Identifier: Apache-2.0
+//
+// Purpose: Load a local footer fragment (./footer.html) and inject into #footer-placeholder
+// Notes:
+// - Keeps id="site-footer" semantics so host pages can hide footers when embedded.
+// - Executes any <script> tags present in footer.html (rare, but supported).
+// - Uses relative URL "./footer.html"
+
+(function () {
+  'use strict';
+
+  var TARGET_ID = 'footer-placeholder';
+  var FOOTER_URL = './footer.html';
+  var ver = (typeof window.APP_VERSION === 'string' && window.APP_VERSION) ? window.APP_VERSION : Date.now().toString();
+  var fetchUrl = FOOTER_URL + (FOOTER_URL.includes('?') ? '&' : '?') + 'v=' + encodeURIComponent(ver);
+
+  function executeInlineScripts(container) {
+    // Find any <script> elements in the injected fragment and execute them.
+    var scripts = container.querySelectorAll('script');
+    scripts.forEach(function (oldScript) {
+      var s = document.createElement('script');
+      // Copy attributes (type, src, etc.)
+      for (var i = 0; i < oldScript.attributes.length; i++) {
+        var attr = oldScript.attributes[i];
+        s.setAttribute(attr.name, attr.value);
+      }
+      // Inline content
+      if (oldScript.textContent) s.textContent = oldScript.textContent;
+      // Replace to trigger execution
+      oldScript.parentNode.replaceChild(s, oldScript);
+    });
+  }
+
+  function inject(html) {
+    var host = document.getElementById(TARGET_ID);
+    if (!host) return;
+    host.innerHTML = html;
+
+    // Dynamic bits (optional)
+    var vEl = document.getElementById('footer-version');
+    if (vEl && typeof window.APP_VERSION === 'string' && window.APP_VERSION) {
+      vEl.textContent = ' · v' + window.APP_VERSION;
+    }
+    var yEl = document.getElementById('footer-year');
+    if (yEl) yEl.textContent = String(new Date().getFullYear());
+
+    executeInlineScripts(host);
+  }
+
+  function injectFallback() {
+    var fallback = [
+      '<footer id="site-footer" class="site-footer" role="contentinfo" style="margin-top:2rem;">',
+      '  <div class="footer-inner">',
+      '    <p><strong>Oxyaudit</strong><span id="footer-version"></span></p>',
+      '    <p>© <span id="footer-year"></span> Andrew · <a href="./">Home</a></p>',
+      '  </div>',
+      '</footer>'
+    ].join('');
+    inject(fallback);
+  }
+
+  function loadFooter() {
+    fetch(fetchUrl, { credentials: 'same-origin' })
+      .then(function (res) { return res.ok ? res.text() : Promise.reject(new Error('HTTP ' + res.status)); })
+      .then(function (html) { inject(html); })
+      .catch(function (err) {
+        console.warn('footer-loader: failed to fetch footer.html:', err);
+        injectFallback();
+      });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', loadFooter, { once: true });
+  } else {
+    loadFooter();
+  }
+})();

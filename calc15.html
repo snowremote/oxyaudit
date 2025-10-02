@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<!-- SPDX-License-Identifier: Apache-2.0 -->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <script>
+      window.APP_VERSION = "20251002-03";
+    </script>
+
+    <style>
+      /* Keep initial hide to avoid flash-of-unstyled content */
+      body.loading {
+        visibility: hidden;
+      }
+
+      body.page-calc15 #settings-panel .settings-language-options .setting-row {
+        border-bottom: none !important;
+        border-top: none !important;
+        padding-left: 0;
+      }
+      body.page-calc15.showing-settings #settings-panel {
+        position: fixed !important;
+        top: 5.2rem;
+        left: 0;
+        right: 0;
+        margin: 0 auto !important;
+        z-index: 3000;
+        background: transparent;
+        max-height: calc(100vh - 6rem);
+        overflow-y: auto;
+        padding-bottom: 1.5rem;
+        overscroll-behavior: contain;
+      }
+      body.page-calc15 #settings-panel .settings-form {
+        display: grid;
+        gap: 1.25rem;
+      }
+      body.page-calc15 #settings-panel .settings-language-options {
+        display: grid;
+        gap: 0.75rem;
+      }
+      body.page-calc15 #settings-panel .settings-language-options .setting-row {
+        padding-left: 0;
+      }
+      body.page-calc15 #settings-panel .settings-language-options .setting-row label {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+      @media (min-width: 520px) {
+        body.page-calc15 #settings-panel .settings-language-options {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+      }
+      @media (min-width: 960px) {
+        body.page-calc15 #settings-panel {
+          max-width: 640px;
+        }
+      }
+      /* ↓ Mobile-only tightening for language options (keeps large screens unchanged) */
+      @media (max-width: 519.98px) {
+        /* reduce the overall vertical rhythm inside the settings sheet */
+        body.page-calc15 #settings-panel .settings-form {
+          gap: 0.75rem; /* was 1.25rem */
+        }
+
+        /* tighten spacing between language rows */
+        body.page-calc15 #settings-panel .settings-language-options {
+          gap: 0.35rem; /* was 0.75rem */
+        }
+
+        /* remove any extra margins/padding on each row */
+        body.page-calc15 #settings-panel .settings-language-options .setting-row {
+          margin: 0; /* ensure no extra bottom margin */
+          padding-top: 0;
+          padding-bottom: 0;
+        }
+
+        /* keep labels compact but readable */
+        body.page-calc15 #settings-panel .settings-language-options .setting-row label {
+          line-height: 1.15; /* tighter line spacing */
+          gap: 0.4rem; /* space between radio and text */
+        }
+      }
+      /* === OXYAUDIT: authoritative Results visibility (local) === */
+      #result {
+        display: none !important;
+      }
+      .results-title {
+        display: none !important;
+      }
+      #clear-container {
+        display: none !important;
+      }
+      .calculator:has(#result:not(:empty)) .results-title {
+        display: block !important;
+      }
+      #result:not(:empty) {
+        display: block !important;
+      }
+      .calculator:has(#result:not(:empty)) #clear-container {
+        display: flex !important;
+      }
+    </style>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'" />
+    <noscript>
+      <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" />
+    </noscript>
+
+    <link rel="stylesheet" href="./css/style.css?v=20251002-01" />
+
+    <link rel="manifest" href="./manifest.webmanifest?v=20251002-01" />
+
+    <meta name="theme-color" content="#22333B" />
+
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="NurseCalc" />
+    <link rel="apple-touch-icon" href="./icons/app-180.png" />
+    <link rel="icon" href="./favicon.ico" sizes="any" />
+
+    <title>#Oxy 14-tray Counting Helper</title>
+  </head>
+  <body class="loading calc15 page-calc15 has-settings">
+    <header id="site-header" role="banner" class="appbar">
+      <a href="./index.html" class="back-button" aria-label="Back to Home">‹</a>
+      <div class="header-inner">
+        <div id="appbar-title" class="site-title oxy-title" aria-label="Oxy— Audit Helper">Oxy— Audit Helper</div>
+      </div>
+      <button id="settings-gear" title="Settings" aria-label="Settings" onclick="window.openSettings15 && openSettings15()">⚙️</button>
+    </header>
+
+    <main>
+      <h2 id="calc-heading">Oxy--- Audit Helper</h2>
+      <div class="calculator">
+        <div class="input-group shade-2">
+          <div class="label-reset-row" style="display: flex; justify-content: space-between; align-items: center">
+            <label class="label-98" id="label-box98" for="box98-buttons">Box 98</label>
+          </div>
+          <div id="box98-buttons" class="toggle-group" role="group" aria-label="Boxes of 98" data-aria-key="box98"></div>
+
+          <label class="label-28" id="label-box28" for="box28-buttons">Box 28</label>
+          <div id="box28-buttons" class="toggle-group" role="group" aria-label="Box 28" data-aria-key="box28"></div>
+        </div>
+
+        <!-- === Trays === -->
+        <div class="input-group shade-3">
+          <label class="label-tray" id="label-tray" for="tray-buttons">Tray 14</label>
+          <div id="tray-buttons" class="toggle-group" role="group" aria-label="Tray 14" data-aria-key="tray"></div>
+        </div>
+
+        <!-- === Extra Tablets === -->
+        <div class="input-group shade-4">
+          <label class="label-extra" id="label-extra" for="tray-tablet-buttons">Singles</label>
+          <div id="tray-tablet-buttons" class="toggle-group" role="group" aria-label="Singles" data-aria-key="extra"></div>
+        </div>
+
+        <!-- === Output Section === -->
+        <div class="results-title" id="results-title">Results</div>
+        <div id="result" class="result"></div>
+
+        <!-- === Clear (centered, only when results visible) === -->
+        <div id="clear-container" class="clear-center" style="display: none">
+          <button id="reset-button" class="reset-button rate-button clear-button" type="button" aria-label="Clear counts">Clear</button>
+        </div>
+
+        <!-- === Calculation Breakdown Section === -->
+        <div class="collapsible-section">
+          <div id="calculation-header" class="collapsible-header"></div>
+          <div id="calculation-body" class="collapsible-body"></div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Settings panel -->
+    <section id="settings-panel" style="display: none">
+      <div class="settings-header">
+        <h2 id="settings-title">Settings</h2>
+        <button id="settings-close" aria-label="Close Settings">&times;</button>
+      </div>
+      <p class="settings-description" id="settings-description">Choose your preferred language for this calculator.</p>
+      <div class="settings-form">
+        <fieldset class="settings-language-options">
+          <legend id="settings-language-legend">Language</legend>
+          <div class="setting-row item">
+            <label>
+              <input type="radio" name="calc15-language" value="en-GB" />
+              <span data-language-option="en-GB">English (UK)</span>
+            </label>
+          </div>
+          <div class="setting-row item">
+            <label>
+              <input type="radio" name="calc15-language" value="nb-NO" />
+              <span data-language-option="nb-NO">Norsk (Bokmål)</span>
+            </label>
+          </div>
+          <div class="setting-row item">
+            <label>
+              <input type="radio" name="calc15-language" value="nn-NO" />
+              <span data-language-option="nn-NO">Norsk (Nynorsk)</span>
+            </label>
+          </div>
+          <div class="setting-row item">
+            <label>
+              <input type="radio" name="calc15-language" value="sv-SE" />
+              <span data-language-option="sv-SE">Svenska</span>
+            </label>
+          </div>
+          <div class="setting-row item">
+            <label>
+              <input type="radio" name="calc15-language" value="da-DK" />
+              <span data-language-option="da-DK">Dansk</span>
+            </label>
+          </div>
+          <div class="setting-row item">
+            <label>
+              <input type="radio" name="calc15-language" value="fi-FI" />
+              <span data-language-option="fi-FI">Suomi</span>
+            </label>
+          </div>
+          <div class="setting-row item">
+            <label>
+              <input type="radio" name="calc15-language" value="es-ES" />
+              <span data-language-option="es-ES">Español</span>
+            </label>
+          </div>
+          <div class="setting-row item">
+            <label>
+              <input type="radio" name="calc15-language" value="fr-FR" />
+              <span data-language-option="fr-FR">Français</span>
+            </label>
+          </div>
+          <div class="setting-row item">
+            <label>
+              <input type="radio" name="calc15-language" value="it-IT" />
+              <span data-language-option="it-IT">Italiano</span>
+            </label>
+          </div>
+          <div class="setting-row item">
+            <label>
+              <input type="radio" name="calc15-language" value="de-DE" />
+              <span data-language-option="de-DE">Deutsch</span>
+            </label>
+          </div>
+        </fieldset>
+
+        <fieldset class="settings-reset-options">
+          <legend id="settings-reset-legend">App Reset</legend>
+          <div class="setting-row">
+            <label class="nc-toggle">
+              <input id="reload-on-close" type="checkbox" class="nc-toggle__input" />
+              <span class="nc-toggle__track" aria-hidden="true">
+                <span class="nc-toggle__thumb"></span>
+              </span>
+              <span class="nc-toggle__label">Automatically update / install clean version</span>
+            </label>
+            <div class="small-hint">Forces a hard refresh and cache clear when closing settings panel.</div>
+          </div>
+          <p class="small-hint" id="reload-on-close-hint">Use this if you are experiencing problems≤. If not resolved, contact the author.</p>
+        </fieldset>
+      </div>
+    </section>
+
+    <!-- Local footer placeholder (populated by ./js/footer-loader.js) -->
+    <div id="footer-placeholder"></div>
+
+    <script src="./js/footer-loader.js" defer></script>
+    <script src="./js/calc15.js?v=20251002-01" defer></script>
+
+    <noscript>
+      <div style="background: #ffcccc; padding: 1em; border: 1px solid #cc0000; color: #660000; margin: 1em 0">
+        <strong>JavaScript is disabled.</strong><br />
+        This calculator requires JavaScript to function. Please enable JavaScript in your browser settings.
+      </div>
+    </noscript>
+
+    <!-- Versioning code to check on load, focus and every 15 mins if a newer version is seen. -->
+    <!-- If newer version exists, show update-notice. On click, unregister any SW -->
+    <!-- clear caches and reload with cache buster. This essentially allows the PWA ("app") to be updated -->
+    <script src="./js/update-check.js" defer></script>
+
+    <!-- === OXYAUDIT inline updater (fallback) ================================ -->
+    <style>
+      /* Authoritative, minimal styles (win against earlier duplicates) */
+      #update-notice {
+        display: none !important;
+        position: fixed !important;
+        left: 0 !important;
+        right: 0 !important;
+        top: calc(env(safe-area-inset-top, 0px) + var(--appbar-height, 56px) + 0.5rem) !important;
+        margin: 0 auto !important;
+        width: min(700px, calc(100% - 2.5rem)) !important;
+        background: #ffcc33 !important;
+        color: #333 !important;
+        font-weight: 600 !important;
+        text-align: center !important;
+        padding: 0.8rem 1rem !important;
+        border: 0.5px solid #f0c000 !important;
+        border-radius: 8px !important;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25) !important;
+        z-index: 5000 !important;
+        pointer-events: auto !important;
+        cursor: pointer !important;
+        transform: none !important;
+      }
+      #update-notice.visible {
+        display: block !important;
+      }
+    </style>
+    <script>
+      (function () {
+        "use strict";
+
+        // If the external updater already defined the API, do nothing.
+        if (window.__oxyUpdate) return;
+
+        var LS_KEY = "oxyaudit.lastSeenVersion";
+        var ID = "update-notice";
+        var MSG = "Update available — tap to update now.";
+        var remoteVersion = null,
+          armed = false;
+
+        function bust(u) {
+          var x = new URL(u, location.href);
+          x.searchParams.set("v", Date.now().toString());
+          return x.toString();
+        }
+        function getSeen() {
+          try {
+            return localStorage.getItem(LS_KEY) || "";
+          } catch (_) {
+            return "";
+          }
+        }
+        function setSeen(v) {
+          try {
+            localStorage.setItem(LS_KEY, String(v || ""));
+          } catch (_) {}
+        }
+
+        function ensureBanner() {
+          var n = document.getElementById(ID);
+          if (!n) {
+            n = document.createElement("div");
+            n.id = ID;
+            n.setAttribute("role", "status");
+            n.setAttribute("aria-live", "polite");
+            document.body.appendChild(n);
+          }
+          n.textContent = MSG;
+          n.classList.add("visible");
+          return n;
+        }
+
+        async function hardReset() {
+          try {
+            if ("serviceWorker" in navigator) {
+              const regs = await navigator.serviceWorker.getRegistrations();
+              await Promise.all(regs.map((r) => r.unregister().catch(() => {})));
+            }
+            if (window.caches && caches.keys) {
+              const names = await caches.keys();
+              await Promise.all(names.map((n) => caches.delete(n).catch(() => {})));
+            }
+          } catch (_) {}
+          if (remoteVersion) setSeen(remoteVersion);
+          location.replace(bust(location.href));
+        }
+
+        function armGlobalClickOnce() {
+          if (armed) return;
+          armed = true;
+          function handler(ev) {
+            var n = document.getElementById(ID);
+            if (!n || !n.classList.contains("visible")) return;
+            try {
+              ev && (ev.preventDefault(), ev.stopPropagation());
+            } catch (_) {}
+            document.removeEventListener("click", handler, true);
+            document.removeEventListener("touchend", handler, true);
+            hardReset();
+          }
+          document.addEventListener("click", handler, true);
+          document.addEventListener("touchend", handler, { passive: false, capture: true });
+        }
+
+        async function fetchRemote() {
+          try {
+            const res = await fetch(bust("./version.json"), { cache: "no-store" });
+            if (!res.ok) return null;
+            const j = await res.json();
+            return j && (j.version || j.v) ? String(j.version || j.v) : null;
+          } catch (_) {
+            return null;
+          }
+        }
+
+        async function checkNow() {
+          const remote = await fetchRemote();
+          if (!remote) return false;
+          remoteVersion = remote;
+          if (getSeen() === remote) return false; // already current on this device
+          const n = ensureBanner();
+          armGlobalClickOnce();
+          n.onclick = hardReset;
+          n.onkeydown = function (e) {
+            if (e.key === "Enter" || e.key === " ") hardReset();
+          };
+          return true;
+        }
+
+        // Expose console helpers (so you can test)
+        window.__oxyUpdate = {
+          show: function () {
+            ensureBanner();
+            armGlobalClickOnce();
+          },
+          hide: function () {
+            var n = document.getElementById(ID);
+            if (n) n.classList.remove("visible");
+          },
+          clearSeen: function () {
+            setSeen("");
+          },
+          getSeen: getSeen,
+          setSeen: setSeen,
+          checkNow: checkNow,
+        };
+
+        function ready(fn) {
+          if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", fn, { once: true });
+          else fn();
+        }
+        ready(checkNow);
+        document.addEventListener("visibilitychange", function () {
+          if (document.visibilityState === "visible") checkNow();
+        });
+        setInterval(checkNow, 15 * 60 * 1000);
+      })();
+    </script>
+    <!-- === /OXYAUDIT inline updater ========================================= -->
+  </body>
+</html>

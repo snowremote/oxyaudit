@@ -1,0 +1,947 @@
+/* SPDX-License-Identifier: Apache-2.0 */
+/* Oxyaudit style.css (trimmed for index + calc15 + footer)
+   - Keeps sticky app bar, calculator card, oxy shades, labels, buttons
+   - Keeps settings panel + language list compact mobile tweak
+   - Keeps footer
+   - Removes styles for unrelated calculators/pages (calc1/2/10/11/16/19/23/26, DSM, room controls, keypad, etc.)
+   IMPORTANT: Order matters; later rules override earlier ones intentionally.
+*/
+
+/* =============================
+   Variables + base
+============================= */
+:root{
+  --color-bg:#22333B;
+  --color-text:#e0e0e0;
+  --color-accent:#D6BB7A;
+  --color-accent-light:#E7D3A6;
+  --color-header:#D6BB7A;
+
+  --color-muted:#fbf2c4;       /* calculator card bg (soft) */
+  --color-dark:#1e2d2f;
+  --color-border:#444;
+
+  --color-result-bg:#18652a;    /* green result pill */
+  --color-result-text:#fff;
+  --color-result-border:#39a739;
+
+  --calc-max-width:450px;
+  --appbar-height:56px;
+}
+
+/* Google font is loaded from HTML <link> */
+html,body{
+  margin:0;
+  padding:0;
+  background:var(--color-bg);
+  color:var(--color-text);
+  font-family:"Poppins","Segoe UI",Tahoma,Geneva,Verdana,sans-serif;
+}
+body{
+  min-height:100vh;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  text-align:center;
+  padding:0.2rem;
+}
+main{
+  flex:1;
+  width:100%;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+}
+h2{
+  color:var(--color-header);
+  font-weight:400;
+  font-size:clamp(1.2rem,4vw,2rem);
+  margin:0.5rem 0 0.1rem;
+}
+
+/* =============================
+   Sticky App Bar (header)
+============================= */
+#site-header.appbar{
+  position:fixed;inset:0 0 auto 0;
+  z-index:1000;
+  display:grid;
+  grid-template-columns:56px 1fr 56px;
+  align-items:center;
+  height:calc(env(safe-area-inset-top,0px)+var(--appbar-height));
+  padding-top:env(safe-area-inset-top,0px);
+  background:var(--color-bg);
+  border-bottom:2px solid var(--color-accent);
+  transition:transform 180ms ease;
+}
+#site-header.appbar.appbar--hidden{
+  transform:translateY(calc(-1*(env(safe-area-inset-top,0px)+var(--appbar-height))));
+}
+/* Keep content below app bar */
+body>main{padding-top:calc(env(safe-area-inset-top,0px)+var(--appbar-height)+0.5rem);}
+
+#site-header .header-inner{
+  grid-column:2;
+  display:flex;align-items:center;justify-content:center;
+}
+#site-header .site-title{
+  text-decoration:none;
+  color:var(--color-text);
+  font-weight:600;
+  font-size:1.25rem;
+  letter-spacing:.01em;
+  display:inline-flex;gap:.25rem;align-items:center;
+  margin:0;padding:0;
+}
+#site-header .site-title .nurse{color:var(--color-accent);}
+#site-header .site-title .calc{color:var(--color-accent-light);margin-left:-.02em;}
+#site-header .brand-mark{
+  width:22px;height:22px;margin-right:.35rem;border-radius:6px;
+  box-shadow:0 0 0 1px rgba(255,255,255,.1),0 1px 2px rgba(0,0,0,.25);
+  vertical-align:middle;position:relative;top:-1px;
+}
+@media (max-width:340px){#site-header .brand-mark{display:none;}}
+
+#site-header .back-button{
+  grid-column:1;
+  width:56px;height:56px;
+  display:inline-flex;align-items:center;justify-content:center;
+  font-size:2rem;background:transparent;border:0;color:inherit;
+  text-decoration:none;
+}
+/* Settings gear: hidden by default; shown on pages that declare has-settings */
+#settings-gear{
+  grid-column:3;
+  display:none;width:56px;height:56px;border:0;background:transparent;
+  font-size:1.25rem;line-height:1;align-items:center;justify-content:center;
+  color:var(--color-header);cursor:pointer;transition:transform .2s ease;
+}
+#settings-gear:hover{transform:scale(1.2);}
+body.index-page #settings-gear,
+body.calc19 #settings-gear,
+body.has-settings #settings-gear{display:inline-flex;}
+body.index-page #site-header .back-button,
+body.showing-settings #site-header .back-button{visibility:hidden;opacity:0;pointer-events:none;}
+
+/* =============================
+   Calculator Card (shared)
+============================= */
+.calculator{
+  background:var(--color-muted);
+  color:#000;
+  width:100%;max-width:var(--calc-max-width);
+  margin:0 auto;
+  padding:.5rem;
+  border-radius:.45em;
+  box-shadow:0 .1em .2em rgba(0,0,0,.1);
+  box-sizing:border-box;
+  display:flex;flex-direction:column;align-items:center;gap:0;
+}
+.calculator label{
+  display:block;
+  font-size:1.1rem;
+  font-weight:normal;
+  text-align:center;
+  margin:.3rem 0;
+  line-height:1.2;
+}
+/* Generic buttons */
+.calculator button,.toggle-button,.rate-button{
+  padding:.2rem .4rem;
+  font-size:1.1rem;
+  border-radius:4px;
+  border:1px solid #a8bfb9;
+  background:#cfded9;color:#123a36;
+  cursor:pointer;transition:transform .2s ease,background .3s ease;
+  font-family:inherit;white-space:normal;box-sizing:border-box;
+}
+.calculator button:hover,.toggle-button:hover,.rate-button:hover{
+  transform:scale(1.05);background:#e0e0e0;
+}
+.calculator button:disabled{
+  background:#bbb;color:#888;border:1px solid var(--color-border);
+  cursor:not-allowed;opacity:.8;
+}
+/* Selected state */
+.toggle-button.selected,.rate-button.selected,.calculator button.selected{
+  background:var(--color-result-bg);color:#fff;border:2px solid var(--color-result-bg);
+}
+/* Focus/active tame */
+.calculator button:focus,.toggle-button:focus,.rate-button:focus,
+.calculator button:active,.toggle-button:active,.rate-button:active{
+  outline:none;transform:scale(.98);
+}
+
+/* Groups */
+.input-group{
+  display:flex;flex-direction:column;align-items:flex-start;gap:.6em;
+  padding:.4rem 1rem;margin:.1rem auto;width:calc(100% - 2px);
+  box-sizing:border-box;border-radius:8px;
+}
+.toggle-group{display:flex;flex-wrap:wrap;gap:.6rem;justify-content:center;width:100%;}
+
+/* Result box */
+.results-title{
+  display:none; /* shown via JS */
+  width:100%;max-width:var(--calc-max-width);
+  text-align:left;font-weight:700;color:#123a36;
+  background:rgba(255,255,255,.85);
+  border-left:4px solid var(--color-accent);
+  border-radius:4px;padding:.2rem .45rem;margin:.2rem auto .5rem;
+  box-sizing:border-box;
+}
+.result{
+  margin:.4rem auto;padding:.4rem 1rem .6rem;
+  border-radius:8px;border:1px solid var(--color-result-border);
+  background:var(--color-result-bg);color:var(--color-result-text);
+  width:100%;max-width:60%;font-size:1.1rem;box-shadow:0 0 3px rgba(0,0,0,.1);
+}
+@media(max-width:600px){.result{max-width:95%;font-size:clamp(1.1rem,5vw,1.35rem);}}
+
+/* =============================
+   Oxy (calc15) specifics
+============================= */
+body.calc15 .calculator label{font-weight:550 !important;font-size:1.05rem !important;margin-bottom:.3rem !important;}
+/* Section tints */
+.shade-1,.shade-2,.shade-3,.shade-4{
+  background:#f2f2f2;border:2px solid #c9c9c9;border-radius:6px;
+  padding:.35rem .6rem;margin:.1rem 0;overflow:hidden;
+}
+body.calc15 .shade-2{background:#e8f2f8 !important;border-color:#9fb6c4 !important;}
+body.calc15 .shade-3{background:#fff4dd !important;border-color:#d7bc7e !important;}
+body.calc15 .shade-4{background:#eceff6 !important;border-color:#a2a6ad !important;}
+
+/* Label chips with left stripe */
+body.calc15 label.label-98,body.calc15 label.label-28,body.calc15 label.label-tray,body.calc15 label.label-extra{
+  display:block;width:100%;text-align:left !important;
+  padding:.15rem .4rem;margin:.2rem 0 .1rem;border-radius:4px;font-weight:600 !important;box-sizing:border-box;
+}
+body.calc15 label.label-98{background:#e7eef3;border-left:4px solid #2f6d7a;color:#15333a;}
+body.calc15 label.label-28{background:#eceaf7;border-left:4px solid #4c5acf;color:#1a234f;}
+body.calc15 label.label-tray{background:#f8f1e3;border-left:4px solid #c9801e;color:#4a3812;}
+body.calc15 label.label-extra{background:#eeeff1;border-left:4px solid #5c6166;color:#22262a;}
+
+/* Compact grids for many buttons */
+.compact-grid{display:flex;flex-wrap:wrap;gap:.1rem;justify-content:left;margin:.1rem .2rem .1rem 0;}
+.compact-grid .toggle-button{flex:0 1 22%;min-width:30px;max-width:40px;padding:.3rem .5rem;font-size:1.2rem;margin-bottom:.3rem;}
+
+body.calc15 .input-group{gap:.1rem;padding:.1rem;margin-bottom:.5rem;border-radius:6px;border:2px solid #c9c9c9;}
+/* Centered clear button container */
+body.calc15 .clear-center{display:flex;justify-content:center;align-items:center;margin:.4rem 0 .2rem;}
+/* Make the Clear button small and neutral */
+body.calc15 #reset-button.clear-button{
+  background:#cfded9 !important;border:1px solid #a8bfb9 !important;color:#123a36 !important;
+  font-size:.88rem !important;font-weight:500 !important;line-height:1.2 !important;
+  padding:.22rem .6rem !important;border-radius:6px !important;box-shadow:0 1px 0 rgba(0,0,0,.06)!important;
+}
+
+/* =============================
+   Settings panel
+============================= */
+#settings-panel{
+  display:none;
+  max-width:700px;margin:2rem auto;padding:1.5rem 1rem;
+  background:var(--color-bg);color:#fff;font-size:1rem;border-radius:18px;
+  border:1px solid rgba(255,255,255,.08);box-shadow:0 28px 48px rgba(0,0,0,.35);
+}
+body.showing-settings #settings-panel{display:block !important;position:fixed;top:5.2rem;left:0;right:0;margin:0 auto;width:min(700px,calc(100% - 2.5rem));z-index:3000;}
+body.showing-settings .calculator,body.showing-settings .back-button{display:none !important;}
+.settings-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:.6rem;}
+#settings-close{background:none;border:none;font-size:2.5rem;color:#fff;cursor:pointer;padding:.2rem .4rem;line-height:1;transition:transform .2s ease,color .2s ease;}
+#settings-close:hover{transform:scale(1.3);color:#ffdddd;}
+.settings-description{font-size:.95rem;margin-bottom:1rem;color:#eee;}
+#settings-panel .settings-form{margin-top:1.25rem;}
+#settings-panel .settings-language-options{
+  background:rgba(0,0,0,.28);
+  border:1px solid rgba(255,255,255,.14);
+  border-radius:14px;padding:1.2rem 1.25rem;
+}
+#settings-panel .settings-language-options legend{color:#f9d995;font-weight:600;padding:0 .35rem;}
+#settings-panel .settings-language-options label{display:flex;align-items:center;gap:.55rem;color:#f4f7fb;font-weight:500;}
+#settings-panel .settings-language-options input[type="radio"]{accent-color:#f9c97d;}
+
+/* Mobile: tighten language rows ONLY on small screens */
+@media (max-width:520px){
+  body.page-calc15 #settings-panel .settings-language-options{display:grid;gap:.35rem;}
+  body.page-calc15 #settings-panel .settings-language-options .setting-row{padding:.15rem 0;border-bottom:none;}
+  body.page-calc15 #settings-panel .settings-language-options .setting-row label{gap:.35rem;}
+}
+
+/* =============================
+   Footer
+============================= */
+footer{
+  font-size:.8rem;color:#888;margin:.7rem 0;text-align:center;width:100%;
+  padding:.4rem;border-top:1px solid var(--color-border);background:var(--color-bg);line-height:1.4;
+}
+.footer-inner{max-width:960px;margin:0 auto;padding:0 .4rem;}
+/* Fade-in helper (footer-loader) */
+html.footer-pending #footer-placeholder{opacity:0;transition:opacity .2s ease;}
+html:not(.footer-pending) #footer-placeholder{opacity:1;}
+
+/* =============================
+   Mobile tweaks
+============================= */
+@media (max-width:600px){
+  .calculator input,.calculator select,.calculator button,.rate-button,.toggle-button{
+    font-size:clamp(1.1rem,5.5vw,1.35rem);
+    padding:.3em .5em;line-height:1.4;max-width:80%;
+  }
+  .toggle-group{gap:.2rem;margin-bottom:.5rem;}
+  .toggle-group .toggle-button{flex:1 1 48%;max-width:48%;min-width:140px;margin-bottom:.5rem;}
+}
+/* Mobile focus/standalone mode */
+body.mobile-focus-mode{overflow:hidden;height:100vh;padding:0;margin:0;background:var(--color-muted);}
+body.mobile-focus-mode #site-header,
+body.mobile-focus-mode #footer-placeholder,/* Update notice (kept for compatibility; hidden by default) */
+#update-notice{display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);
+  background:#ffcc33;color:#333;font-weight:600;font-size:1.1rem;padding:1rem 1.4rem;border:.5px solid #f0c000;
+  border-radius:8px;z-index:9999;opacity:0;pointer-events:none;transition:opacity .4s ease;box-shadow:0 4px 10px rgba(0,0,0,.25);
+}/* === Oxyaudit: force Settings cog visibility ============================ */
+/* Show the cog on any page that sets .has-settings on <body>. */
+body.has-settings #settings-gear {
+  display: inline-flex !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+  z-index: 2000; /* above content */
+}
+
+/* Keep it hidden only when the settings panel is open. */
+body.showing-settings #settings-gear {
+  display: none !important;
+}
+/* === Oxyaudit: app bar gear placement (right slot) ===================== */
+/* Ensure the compact app bar uses the 3-column grid. */
+#site-header.appbar {
+  display: grid !important;
+  grid-template-columns: 56px 1fr 56px !important;
+  align-items: center !important;
+}
+
+/* Back button sits in the left slot (no absolute/fixed positioning). */
+#site-header.appbar .back-button {
+  position: static !important;
+  width: 56px; height: 56px;
+  display: inline-flex; align-items: center; justify-content: center;
+}
+
+/* Put the settings cog in the RIGHT grid column and keep it visible. */
+#site-header.appbar #settings-gear {
+  position: static !important;           /* override any old fixed rule */
+  grid-column: 3 !important;             /* right slot */
+  justify-self: center !important;       /* centered inside the right slot */
+  align-self: center !important;
+  display: inline-flex !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+}
+
+/* Hide the cog only while the settings panel is open. */
+body.showing-settings #settings-gear {
+  display: none !important;
+}
+/* === Oxyaudit (calc15): show only the settings cog, hide legacy app bar === */
+
+/* Hide everything in the old app bar except the gear */
+body.page-calc15 #site-header .header-inner,
+body.page-calc15 #site-header .site-title,
+body.page-calc15 #site-header .brand-mark,
+body.page-calc15 #site-header .beta,
+body.page-calc15 #site-header .back-button {
+  display: none !important;
+}
+
+/* Neutralize the app bar chrome/spacing */
+body.page-calc15 #site-header,
+body.page-calc15 #site-header.appbar {
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  height: 0 !important;
+  padding: 0 !important;
+}
+
+/* Put the settings cog at the exact top-right of the viewport */
+body.page-calc15 #settings-gear {
+  position: fixed !important;
+  top: 0.6rem;
+  right: 0.6rem;
+  display: inline-flex !important;
+  width: 56px;  /* matches original appbar slot size */
+  height: 56px;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+  background: transparent;
+  border: 0;
+  z-index: 1001;
+}
+
+/* Remove the global appbar top padding so content sits correctly */
+body.page-calc15 > main {
+  padding-top: 0.5rem !important;
+}
+/* === Oxyaudit (calc15): show only the settings cog, hide legacy app bar === */
+
+/* Hide everything in the old app bar except the gear */
+body.page-calc15 #site-header .header-inner,
+body.page-calc15 #site-header .site-title,
+body.page-calc15 #site-header .brand-mark,
+body.page-calc15 #site-header .beta,
+body.page-calc15 #site-header .back-button {
+  display: none !important;
+}
+
+/* Neutralize the app bar chrome/spacing */
+body.page-calc15 #site-header,
+body.page-calc15 #site-header.appbar {
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  height: 0 !important;
+  padding: 0 !important;
+}
+
+/* Put the settings cog at the exact top-right of the viewport */
+body.page-calc15 #settings-gear {
+  position: fixed !important;
+  top: 0.6rem;
+  right: 0.6rem;
+  display: inline-flex !important;
+  width: 56px;  /* matches original appbar slot size */
+  height: 56px;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+  background: transparent;
+  border: 0;
+  z-index: 1001;
+}
+
+/* Remove the global appbar top padding so content sits correctly */
+body.page-calc15 > main {
+  padding-top: 0.5rem !important;
+}
+
+/* === Oxyaudit (calc15): hide header visuals but keep the fixed cog visible === */
+/* Hide all header content (stops the centred cog/banner artefact) */
+body.page-calc15 #site-header,
+body.page-calc15 #site-header.appbar {
+  visibility: hidden !important;   /* collapses visuals without layout jumps */
+  pointer-events: none !important; /* nothing in header is clickable */
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  height: 0 !important;
+  padding: 0 !important;
+}
+
+/* Re-enable and place ONLY the settings cog */
+body.page-calc15 #settings-gear {
+  visibility: visible !important;  /* overrides inherited hidden */
+  pointer-events: auto !important;
+  position: fixed !important;
+  top: 0.6rem;
+  right: 0.6rem;
+  z-index: 2000;                   /* above everything */
+  display: inline-flex !important;
+}
+
+/* Ensure page content sits correctly below */
+body.page-calc15 > main {
+  padding-top: 0.5rem !important;
+}
+
+/* === Oxyaudit (calc15): keep ONLY the fixed top-right cog ================= */
+
+/* 1) Kill any cog or decorative glyph in the header centre area */
+body.page-calc15 #site-header .header-inner,
+body.page-calc15 #site-header .header-inner * {
+  display: none !important;
+}
+body.page-calc15 #site-header .site-title::before,
+body.page-calc15 #site-header .site-title::after {
+  content: none !important;
+  display: none !important;
+}
+
+/* 2) Place and show the real Settings cog (single instance) */
+body.page-calc15 #settings-gear {
+  position: fixed !important;
+  top: 0.6rem;
+  right: 0.6rem;
+  display: inline-flex !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+  z-index: 2000 !important;
+}
+
+/* 3) Ensure global header chrome is neutralised but doesn't hide the fixed cog */
+body.page-calc15 #site-header,
+body.page-calc15 #site-header.appbar {
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  height: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important; /* prevents any banner bleed-through */
+}
+
+/* Keep page content placed correctly */
+body.page-calc15 > main {
+  padding-top: 0.5rem !important;
+}
+
+
+/* === Oxyaudit: host vs iframe gears ====================================== */
+/* A) Host page (index.html): put its gear at the top-right */
+body.host-embed #settings-gear {
+  position: fixed !important;
+  top: 0.6rem;
+  right: 0.6rem;
+  display: inline-flex !important;
+  z-index: 4000 !important; /* above iframe content */
+}
+
+/* B) Iframe page (calc15.html): hide its local gear only when embedded */
+html.embedded body.page-calc15 #settings-gear,
+body.embedded.page-calc15 #settings-gear {
+  display: none !important;
+}
+
+/* === Oxyaudit (calc15): restore original left inset for labels & numbers === */
+/* Adds a slightly larger left gutter inside each group (matches old layout) */
+body.calc15 .input-group {
+  padding-left: clamp(1.2rem, 3.5vw, 1.8rem) !important;
+}
+
+/* Nudge the first row of number buttons so they line up under the label chip */
+body.calc15 .compact-grid {
+  margin-left: clamp(0.25rem, 1.6vw, 0.6rem) !important; /* previously 0 */
+}
+
+/* === Oxyaudit (calc15): keep desktop-style grid on mobile =============== */
+@media (max-width: 600px) {
+  /* Cancel the global 2-per-row rule just for calc15 */
+  body.calc15 .toggle-group .toggle-button {
+    flex: 0 1 auto !important;
+    max-width: none !important;
+    min-width: 36px !important;   /* small, like desktop */
+    margin-bottom: .35rem !important;
+  }
+
+  /* Ensure compact grid keeps many buttons per row */
+  body.calc15 .compact-grid .toggle-button {
+    min-width: 36px !important;
+    max-width: 48px !important;
+  }
+
+  /* Avoid the generic buttons' max-width from constraining layout */
+  body.calc15 .calculator button,
+  body.calc15 .rate-button,
+  body.calc15 .toggle-button {
+    max-width: unset !important;
+  }
+
+  /* Slightly larger gap for touch without wrapping to 2 columns */
+  body.calc15 .toggle-group {
+    gap: .35rem !important;
+  }
+}
+
+/* === Oxyaudit (calc15): keep Results inside the card on mobile =========== */
+@media (max-width: 600px) {
+  /* Ensure nothing can spill outside the rounded card */
+  body.calc15 .calculator {
+    overflow: hidden !important;
+  }
+
+  /* Constrain Results banner and pill to the card's inner width */
+  body.calc15 .results-title,
+  body.calc15 .result {
+    width: 100% !important;
+    max-width: calc(100% - 1rem) !important; /* 0.5rem card padding each side */
+    box-sizing: border-box !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    overflow-wrap: anywhere !important; /* safety for unexpected long text */
+  }
+}
+
+/* Ensure Oxyaudit footer is visible when embedded */
+#site-footer { display: block !important; }
+/* === Oxyaudit (calc15): force sticky app bar visible ===================== */
+/* Undo any previous visibility/height zeroing and show the app chrome */
+body.page-calc15 #site-header,
+body.page-calc15 #site-header.appbar{
+  visibility: visible !important;
+  pointer-events: auto !important;
+  position: fixed !important; top: 0; left: 0; right: 0; z-index: 1000 !important;
+  height: calc(env(safe-area-inset-top,0px) + var(--appbar-height)) !important;
+  padding-top: env(safe-area-inset-top,0px) !important;
+  background: var(--color-bg) !important;
+  border-bottom: 2px solid var(--color-accent) !important;
+  display: grid !important;
+  grid-template-columns: 56px 1fr 56px !important;
+  overflow: hidden !important;
+}
+
+/* Show only the centred title; keep legacy bits hidden */
+body.page-calc15 #site-header .header-inner{
+  display:flex !important; align-items:center !important; justify-content:center !important;
+}
+body.page-calc15 #site-header .brand-mark,
+body.page-calc15 #site-header .beta,
+body.page-calc15 #site-header .back-button{ display:none !important; }
+
+/* Title styling (works for the new plain title node) */
+body.page-calc15 #site-header .site-title{
+  display:inline-flex !important;
+  color:var(--color-text) !important; font-weight:600 !important; font-size:1.2rem !important;
+  letter-spacing:.01em;
+}
+
+/* Keep page content below the bar */
+body.page-calc15 > main{
+  padding-top: calc(env(safe-area-inset-top,0px) + var(--appbar-height) + 0.5rem) !important;
+}
+
+/* Single-gear policy: hide iframe gear when embedded; use host gear only */
+html.embedded body.page-calc15 #settings-gear,
+body.embedded.page-calc15 #settings-gear{ display:none !important; }
+
+/* Host gear placement (top-right, above iframe) */
+body.host-embed #settings-gear{
+  position:fixed !important; top:.6rem; right:.6rem; z-index:4000 !important;
+  display:inline-flex !important;
+}
+/* === Oxyaudit: keep ONLY the sticky-header cog =========================== */
+/* Hide the host-page gear (index.html) */
+body.host-embed #settings-gear {
+  display: none !important;
+}
+
+/* Show the iframe's gear (calc15.html) even when embedded */
+html.embedded body.page-calc15 #settings-gear,
+body.page-calc15.embedded #settings-gear {
+  display: inline-flex !important;
+  position: static !important;              /* place inside header grid */
+  grid-column: 3 !important;                /* right slot */
+  justify-self: center !important;
+  align-self: center !important;
+}
+
+/* Ensure the header grid has the 3 slots visible */
+body.page-calc15 #site-header.appbar {
+  display: grid !important;
+  grid-template-columns: 56px 1fr 56px !important;
+}
+/* === Oxyaudit (calc15): non-overlay Settings; footer pushed, not overlapped === */
+
+/* When Settings is open, hide the main calculator area entirely */
+body.page-calc15.showing-settings > main {
+  display: none !important;
+}
+
+/* Turn the settings sheet into a normal block under the sticky app bar */
+body.page-calc15.showing-settings #settings-panel {
+  position: static !important;             /* was fixed */
+  top: auto !important;
+  left: auto !important;
+  right: auto !important;
+  z-index: auto !important;
+  display: block !important;
+  width: min(700px, calc(100% - 2.5rem)) !important;
+  margin: 0.75rem auto 1rem !important;    /* sits under the bar */
+  max-height: none !important;             /* allow full natural height */
+  overflow: visible !important;            /* no internal scroller */
+  background: var(--color-bg) !important;  /* ensure opaque (no bleed-through) */
+  padding-bottom: 1.25rem !important;
+}
+
+/* Keep the sticky header visible and the single header cog on the right */
+body.page-calc15 #site-header.appbar {
+  display: grid !important;
+  grid-template-columns: 56px 1fr 56px !important;
+}
+
+/* Footer should always be visible and follow the settings sheet */
+#site-footer {
+  display: block !important;
+}
+/* === Oxyaudit (calc15): nudge Settings sheet below sticky header ========= */
+body.page-calc15.showing-settings #settings-panel{
+  /* match the bar height + a little breathing room */
+  margin-top: calc(env(safe-area-inset-top, 0px) + var(--appbar-height) + 0.5rem) !important;
+}
+/* === Oxyaudit (calc15): remove page header, localise app-bar, yellow chrome === */
+
+/* 0) Tweakable constant: how tall the page header spacer should be */
+:root{ --calc15-title-spacer: 1.0rem; } /* ~half the previous H2 height */
+
+/* 1) Hide the yellow page header text but keep half-height spacing */
+body.page-calc15 #calc-heading{
+  visibility: hidden !important;       /* not read or clickable */
+  height: var(--calc15-title-spacer) !important;
+  margin: 0.25rem 0 0.1rem !important; /* keep a little rhythm */
+  padding: 0 !important;
+}
+
+/* 2) App bar uses the same yellow as the old page header */
+body.page-calc15 #site-header.appbar{
+  background: var(--color-accent) !important;    /* yellow bar */
+  border-bottom: 2px solid rgba(0,0,0,.25) !important;
+}
+
+/* 3) App bar title styling and colour for contrast on yellow */
+body.page-calc15 #site-header .site-title.oxy-title{
+  color: #22333B !important;    /* dark text on yellow */
+  font-weight: 600 !important;
+}
+
+/* 4) Ensure we keep only the app-bar cog (you already hid host cog) */
+body.page-calc15 #site-header.appbar{
+  display: grid !important; grid-template-columns:56px 1fr 56px !important;
+}
+html.embedded body.page-calc15 #settings-gear{
+  display: inline-flex !important;
+  position: static !important;
+  grid-column: 3 !important;
+  justify-self: center !important;
+  align-self: center !important;
+}
+/* === Oxyaudit (calc15): app-bar colours — dark bg, yellow title ========== */
+body.page-calc15 #site-header.appbar{
+  background: var(--color-bg) !important;            /* dark green */
+  border-bottom: 2px solid var(--color-accent) !important; /* yellow underline */
+}
+body.page-calc15 #site-header .site-title.oxy-title{
+  color: var(--color-accent) !important;             /* yellow title text */
+}
+/* App-bar title: regular weight */
+body.page-calc15 #site-header .site-title.oxy-title{
+  font-weight: 400 !important; /* Poppins regular */
+}
+/* === Oxyaudit (calc15): App Reset settings box ============================ */
+#settings-panel .settings-reset-options{
+  background: rgba(0,0,0,.28);
+  border: 1px solid rgba(255,255,255,.14);
+  border-radius: 14px;
+  padding: 1.2rem 1.25rem;
+  margin-top: .5rem;
+}
+#settings-panel .settings-reset-options legend{
+  color: #f9d995; font-weight: 600; padding: 0 .35rem;
+}
+#settings-panel .settings-reset-options .setting-row{
+  padding: .25rem 0;
+}
+
+/* Simple iOS-like switch */
+#settings-panel .switch{ display:inline-flex; align-items:center; gap:.6rem; }
+#settings-panel .switch input{
+  appearance:none; -webkit-appearance:none; width:46px; height:26px;
+  border-radius:999px; background:#65737a; position:relative; outline:none;
+  border:1px solid rgba(255,255,255,.25); cursor:pointer; transition:background .2s ease, border-color .2s ease;
+}
+#settings-panel .switch input::after{
+  content:""; position:absolute; top:3px; left:3px; width:18px; height:18px;
+  background:#fff; border-radius:50%; box-shadow:0 1px 2px rgba(0,0,0,.4);
+  transition:transform .2s ease;
+}
+#settings-panel .switch input:checked{ background: var(--color-accent); border-color: var(--color-accent-light); }
+#settings-panel .switch input:checked::after{ transform: translateX(20px); }
+#settings-panel .switch-label{ font-weight:500; }
+#settings-panel .small-hint{ margin:.5rem 0 0; opacity:.85; font-size:.9rem; }
+/* Make the update toast tappable when visible */
+#update-notice.visible{
+  pointer-events: auto !important;
+  cursor: pointer !important;
+  z-index: 5000 !important; /* above header/content */
+}
+/* Ensure the update toast actually shows when marked visible */
+#update-notice.visible {
+  display: block !important;
+  pointer-events: auto !important;
+  cursor: pointer !important;
+  z-index: 5000 !important; /* above header/content */
+}
+#update-notice.visible{
+  display: block !important;
+  pointer-events: auto !important;
+  cursor: pointer !important;
+  z-index: 5000 !important;
+}
+/* === Oxyaudit: update banner (safe) ====================================== */
+#update-notice{
+  display:none;
+  position:fixed;
+  left:0; right:0;
+  top: calc(env(safe-area-inset-top,0px) + var(--appbar-height) + 0.5rem);
+  margin: 0 auto;
+  width: min(700px, calc(100% - 2.5rem));
+  background:#ffcc33;
+  color:#333;
+  font-weight:600;
+  text-align:center;
+  padding: 0.8rem 1rem;
+  border: 0.5px solid #f0c000;
+  border-radius:8px;
+  box-shadow:0 4px 10px rgba(0,0,0,.25);
+  z-index: 5000;               /* above content and header chrome */
+  pointer-events: auto;         /* tappable */
+  cursor: pointer;
+/* === Oxyaudit: single update banner — centred, tappable =================== */
+#update-notice{
+  display: none;
+  position: fixed !important;
+  left: 0 !important;
+  right: 0 !important;
+  top: calc(env(safe-area-inset-top, 0px) + var(--appbar-height) + 0.5rem) !important;
+  margin: 0 auto !important;
+  width: min(700px, calc(100% - 2.5rem)) !important;
+  background: #ffcc33 !important;
+  color: #333 !important;
+  font-weight: 600 !important;
+  text-align: center !important;
+  padding: 0.8rem 1rem !important;
+  border: 0.5px solid #f0c000 !important;
+  border-radius: 8px !important;
+  box-shadow: 0 4px 10px rgba(0,0,0,.25) !important;
+  z-index: 5000 !important;
+  pointer-events: auto !important;
+  cursor: pointer !important;
+
+  /* kill legacy centring that pushed it off-screen on iOS */
+  transform: none !important;
+/* === Oxyaudit: single update banner (authoritative) ====================== */
+#update-notice{
+  display: none;
+  position: fixed !important;
+  left: 0 !important; right: 0 !important;
+  top: calc(env(safe-area-inset-top, 0px) + var(--appbar-height) + 0.5rem) !important;
+  margin: 0 auto !important;
+  width: min(700px, calc(100% - 2.5rem)) !important;
+  background: #ffcc33 !important; color: #333 !important;
+  font-weight: 600 !important; text-align: center !important;
+  padding: 0.8rem 1rem !important;
+  border: 0.5px solid #f0c000 !important; border-radius: 8px !important;
+  box-shadow: 0 4px 10px rgba(0,0,0,.25) !important;
+  z-index: 5000 !important; pointer-events: auto !important; cursor: pointer !important;
+  transform: none !important;
+}
+#update-notice.visible{ display: block !important; }
+@media (max-width:520px){ #update-notice{ width: calc(100% - 1.5rem) !important; } }
+
+/* === Oxyaudit: Results visibility guards ================================ */
+.results-title { display: none !important; }        /* default hidden */
+#result:empty    { display: none !important; }      /* hide empty green pill */
+
+/* Show the banner only when there is actual output in #result */
+.calculator:has(#result:not(:empty)) .results-title { display: block !important; }
+
+/* === OXYAUDIT: authoritative Results visibility ===========================
+   Hide the Results banner, pill and Clear container until there is output.
+   Show them only when #result has content (Safari supports :has).           */
+#result { display: none !important; }
+.results-title { display: none !important; }
+#clear-container { display: none !important; }
+
+/* When there IS output, flip them on */
+.calculator:has(#result:not(:empty)) .results-title { display: block !important; }
+#result:not(:empty) { display: block !important; }
+.calculator:has(#result:not(:empty)) #clear-container { display: flex !important; }
+
+/* === OXYAUDIT: Settings sheet visibility guard =========================== */
+body.page-calc15.showing-settings #settings-panel { display: block !important; }
+
+/* === Update banner (single authoritative) === */
+#update-notice{
+  display:none;
+  position:fixed !important;
+  left:0 !important; right:0 !important;
+  top:calc(env(safe-area-inset-top,0px) + var(--appbar-height) + 0.5rem) !important;
+  margin:0 auto !important;
+  width:min(700px, calc(100% - 1.5rem)) !important;
+  background:#ffcc33 !important;
+  color:#333 !important;
+  font-weight:600 !important;
+  text-align:center !important;
+  padding:0.8rem 1rem !important;
+  border:0.5px solid #f0c000 !important;
+  border-radius:8px !important;
+  box-shadow:0 4px 10px rgba(0,0,0,.25) !important;
+  z-index:5000 !important;
+  pointer-events:auto !important;
+  cursor:pointer !important;
+  transform:none !important;
+}
+#update-notice.visible{ display:block !important; }
+
+/* Safety: never stay hidden forever */
+@keyframes _unhide{from{visibility:hidden}to{visibility:visible}}
+body.loading{animation:_unhide 2s steps(1,end) forwards}
+
+/* Authoritative: never hide the update toast once visible */
+#update-notice.visible { display:block !important; opacity:1 !important; pointer-events:auto !important; }
+/* Even if some mode tries to hide it: */
+body.mobile-focus-mode #update-notice.visible { display:block !important; }
+
+/* === OXYAUDIT: authoritative update banner === */
+#update-notice{
+  display: none !important;
+  position: fixed !important;
+  left: 0 !important; right: 0 !important;
+  top: calc(env(safe-area-inset-top, 0px) + var(--appbar-height, 56px) + 0.5rem) !important;
+  margin: 0 auto !important;
+  width: min(700px, calc(100% - 2.5rem)) !important;
+  background: #ffcc33 !important; color: #333 !important;
+  font-weight: 600 !important; text-align: center !important;
+  padding: 0.8rem 1rem !important;
+  border: 0.5px solid #f0c000 !important; border-radius: 8px !important;
+  box-shadow: 0 4px 10px rgba(0,0,0,.25) !important;
+  z-index: 5000 !important;
+  pointer-events: auto !important; cursor: pointer !important;
+  transform: none !important;
+}
+#update-notice.visible{ display: block !important; }
+# paste the CSS above
+
+/* === OXYAUDIT: authoritative update banner (final override) ============== */
+#update-notice.visible{
+  display:block !important;
+  position:fixed !important;
+  left:0 !important; right:0 !important;
+  top:calc(env(safe-area-inset-top, 0px) + var(--appbar-height, 56px) + .5rem) !important;
+  margin:0 auto !important;
+  width:min(700px, calc(100% - 1.5rem)) !important;
+  opacity:1 !important; visibility:visible !important;
+  z-index:99999 !important;
+  pointer-events:auto !important; cursor:pointer !important;
+  transform:none !important;
+}
+/* Guard against any global “hide” base rules */
+#update-notice{ opacity:1 !important; visibility:visible !important; }
+/* Ensure mobile-focus mode can’t suppress a visible banner */
+body.mobile-focus-mode #update-notice.visible{ display:block !important; }
+
+/* === OXYAUDIT: authoritative update banner (final override) ============== */
+#update-notice.visible{
+  display:block !important;
+  position:fixed !important;
+  left:0 !important; right:0 !important;
+  top:calc(env(safe-area-inset-top, 0px) + var(--appbar-height, 56px) + .5rem) !important;
+  margin:0 auto !important;
+  width:min(700px, calc(100% - 1.5rem)) !important;
+  opacity:1 !important; visibility:visible !important;
+  z-index:99999 !important;
+  pointer-events:auto !important; cursor:pointer !important;
+  transform:none !important;
+}
+/* Guard against any base “hide” rules */
+#update-notice{ opacity:1 !important; visibility:visible !important; }
+/* Even in mobile-focus mode, keep it visible if it’s marked visible */
+body.mobile-focus-mode #update-notice.visible{ display:block !important; }

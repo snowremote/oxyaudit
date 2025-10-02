@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<!-- SPDX-License-Identifier: Apache-2.0 -->
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Opioid dose audit — Oxyaudit</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#14282F">
+
+  <!-- Use relative paths so this works at /oxyaudit/ and on GitHub Pages -->
+  <link rel="stylesheet" href="./css/style.css?v=20251002-01">
+
+  <!-- Local icons (kept relative) -->
+  <link rel="icon" href="./favicon.ico">
+  <link rel="apple-touch-icon" href="./icons/app-180.png">
+
+  <!-- NEW: Web App Manifest (optional but recommended) -->
+  <link rel="manifest" href="./manifest.webmanifest?v=20251002-01">
+
+  <style>
+    /* Behaviour identical to your original; only paths changed */
+    html, body {
+      height: 100%;
+      margin: 0;
+      background: #14282F;
+    }
+    #frameHost {
+      position: fixed;
+      left: 0; right: 0; bottom: 0;
+      top: 0;
+      border: 0;
+      width: 100%;
+      height: 100dvh;
+      opacity: 0;
+      transition: opacity .25s ease;
+      background: #14282F;
+    }
+    #frameHost.ready { opacity: 1; }
+  </style>
+</head>
+<body class="has-settings host-embed">
+  <!-- Floating Settings gear mirrors NurseCalc behaviour -->
+  <button id="settings-gear" title="Settings" aria-label="Settings">⚙️</button>
+
+  <!-- IMPORTANT: iframe now uses a RELATIVE src -->
+  <iframe
+    id="frameHost"
+    src="./calc15.html?v=20251002-01"
+    title="Opioid dose audit calculator"
+    loading="eager"
+    referrerpolicy="same-origin"
+  ></iframe>
+<script>
+  (function () {
+    const iframe = document.getElementById('frameHost');
+    const appbar = document.getElementById('site-header');
+    const gearButton = document.getElementById('settings-gear');
+    const hostBody = document.body;
+
+    let classObserver;
+    let gearObserver;
+    let pendingOpen = false;
+
+    // --- Viewport fitter: give the iframe exact top + height in px (headerless) ---
+    function fitIframe() {
+      const h = appbar ? appbar.offsetHeight : 0;
+      iframe.style.top = h + 'px';
+      const vh = window.innerHeight || document.documentElement.clientHeight || 0;
+      iframe.style.height = Math.max(vh - h, 0) + 'px';
+    }
+
+    // Resize handlers (debounced)
+    let t;
+    function scheduleFit() { clearTimeout(t); t = setTimeout(fitIframe, 50); }
+    window.addEventListener('resize', scheduleFit);
+    window.addEventListener('orientationchange', scheduleFit);
+    window.addEventListener('pageshow', scheduleFit);
+
+    if (document.fonts && document.fonts.ready) {
+      document.fonts.ready.then(scheduleFit).catch(()=>{});
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', fitIframe, { once: true });
+    } else {
+      fitIframe();
+    }
+
+    function getInnerDocument() {
+      try {
+        return iframe.contentDocument || iframe.contentWindow?.document || null;
+      } catch (err) {
+        console.warn('Oxyaudit unable to access iframe document:', err);
+        return null;
+      }
+    }
+
+    function syncGearAttributes(innerDoc) {
+      if (!gearButton || !innerDoc) return;
+      const innerGear = innerDoc.getElementById('settings-gear');
+      if (!innerGear) return;
+      const title = innerGear.getAttribute('title');
+      const aria = innerGear.getAttribute('aria-label');
+      if (title) gearButton.title = title;
+      if (aria) gearButton.setAttribute('aria-label', aria);
+    }
+
+    function setupGearObserver(innerDoc) {
+      if (!gearButton || !innerDoc) return;
+      const innerGear = innerDoc.getElementById('settings-gear');
+      if (!innerGear) return;
+
+      syncGearAttributes(innerDoc);
+
+      try { gearObserver?.disconnect(); } catch (_) {}
+      try {
+        gearObserver = new MutationObserver(() => syncGearAttributes(innerDoc));
+        gearObserver.observe(innerGear, { attributes: true, attributeFilter: ['title', 'aria-label'] });
+      } catch (err) {
+        console.warn('Oxyaudit gear observer failed:', err);
+      }
+    }
+
+    function syncBodyClass(innerBody) {
+      if (!innerBody || !hostBody) return;
+      hostBody.classList.toggle('showing-settings', innerBody.classList.contains('showing-settings'));
+    }
+
+    function setupClassObserver(innerDoc) {
+      const innerBody = innerDoc?.body;
+      if (!innerBody) return;
+
+      syncBodyClass(innerBody);
+
+      try { classObserver?.disconnect(); } catch (_) {}
+      try {
+        classObserver = new MutationObserver(() => syncBodyClass(innerBody));
+        classObserver.observe(innerBody, { attributes: true, attributeFilter: ['class'] });
+      } catch (err) {
+        console.warn('Oxyaudit settings observer failed:', err);
+      }
+    }
+
+    function tryOpenSettings() {
+      const innerWin = iframe?.contentWindow;
+      const innerDoc = getInnerDocument();
+      if (!innerWin || !innerDoc) return false;
+
+      const openFn = innerWin.openSettings15 || innerWin.openSettings || innerWin.showSettings;
+      if (typeof openFn === 'function') {
+        openFn.call(innerWin);
+        return true;
+      }
+
+      const innerGear = innerDoc.getElementById('settings-gear');
+      if (innerGear) {
+        innerGear.click();
+        return true;
+      }
+      return false;
+    }
+
+    gearButton?.addEventListener('click', (event) => {
+      event.preventDefault();
+      if (!tryOpenSettings()) {
+        pendingOpen = true;
+      }
+    });
+
+    // Hide site chrome inside the embedded page to avoid double headers.
+    // IMPORTANT CHANGE: do NOT hide generic <footer> or #footer so Oxyaudit's local footer remains visible.
+    function handleFrameLoad() {
+      try {
+        const doc = getInnerDocument();
+        if (!doc) return;
+
+        // ⬇️ Changed: removed '#footer' and 'footer' from this list.
+        [
+          '#topbar',
+          '#site-footer',                  // still hide a NurseCalc-specific footer if present
+          '#nav','.global-nav'
+        ].forEach(sel => {
+          const el = doc.querySelector(sel);
+          if (el) el.style.display = 'none';
+        });
+
+        const main = doc.querySelector('main, #main, .main, .calculator, #content');
+        if (main) {
+          main.style.marginTop = '0';
+          main.style.paddingTop = '0.5rem';
+        }
+
+        // Ensure the embedded page isn't stuck hidden while we host it headerless.
+        if (doc.body && doc.body.classList.contains('loading')) {
+          doc.body.classList.remove('loading');
+        }
+        if (doc.documentElement) {
+          doc.documentElement.classList.remove('footer-pending');
+        }
+
+        setupClassObserver(doc);
+        setupGearObserver(doc);
+      } catch (e) {
+        console.warn('Oxyaudit iframe post-load tweak skipped:', e);
+      } finally {
+        iframe.classList.add('ready');
+        fitIframe();
+
+        if (pendingOpen) {
+          pendingOpen = !tryOpenSettings();
+        }
+      }
+    }
+
+    iframe.addEventListener('load', handleFrameLoad);
+
+    if (iframe.contentDocument && iframe.contentDocument.readyState === 'complete') {
+      setTimeout(handleFrameLoad, 0);
+    }
+  })();
+</script>
+
+<script>
+/* Single, safe update banner — iOS friendly.
+   Checks version.json on load, on foreground, and every 15 min.
+   Shows a single yellow banner: “Update available — tap to update now.”
+   On tap: unregister SW, clear caches, mark version as seen, hard reload with cache-buster. */
+(function(){
+  'use strict';
+  var LS_KEY = 'oxyaudit.lastSeenVersion';
+  var BANNER_ID = 'update-notice';
+  var MSG = 'Update available — tap to update now.';
+  var remoteVersion = null;
+  var armed = false;
+
+  function bust(url){
+    var u = new URL(url, location.href);
+    u.searchParams.set('v', Date.now().toString());
+    return u.toString();
+  }
+  function getSeen(){
+    try { return localStorage.getItem(LS_KEY) || ''; } catch(_) { return ''; }
+  }
+  function setSeen(v){
+    try { localStorage.setItem(LS_KEY, String(v||'')); } catch(_) {}
+  }
+
+  function ensureBanner(){
+    var n = document.getElementById(BANNER_ID);
+    if (!n) {
+      n = document.createElement('div');
+      n.id = BANNER_ID;
+      n.setAttribute('role','status');
+      n.setAttribute('aria-live','polite');
+      document.body.appendChild(n);
+    }
+    n.textContent = MSG;
+    n.classList.add('visible');
+    return n;
+  }
+
+  function armBanner(n){
+    if (armed) return; armed = true;
+    async function act(ev){
+      try { ev && (ev.preventDefault(), ev.stopPropagation()); } catch(_){}
+      // Mark as seen to prevent a loop after reload
+      if (remoteVersion) setSeen(remoteVersion);
+
+      try {
+        if ('serviceWorker' in navigator) {
+          const regs = await navigator.serviceWorker.getRegistrations();
+          await Promise.all(regs.map(r => r.unregister().catch(()=>{})));
+        }
+        if (window.caches && caches.keys) {
+          const names = await caches.keys();
+          await Promise.all(names.map(k => caches.delete(k).catch(()=>{})));
+        }
+      } catch (_) {}
+
+      // Hard reload with cache-buster
+      location.replace(bust(location.href));
+    }
+    n.addEventListener('click', act, false);
+    n.addEventListener('touchend', act, { passive:false });
+    n.addEventListener('keydown', function(e){
+      if (e.key === 'Enter' || e.key === ' ') act(e);
+    }, false);
+  }
+
+  async function fetchRemote(){
+    try{
+      const res = await fetch(bust('./version.json'), { cache:'no-store' });
+      if (!res.ok) return null;
+      const j = await res.json();
+      return (j && (j.version || j.v)) ? String(j.version || j.v) : null;
+    }catch(_){ return null; }
+  }
+
+  async function check(){
+    const remote = await fetchRemote();
+    if (!remote) return;
+    remoteVersion = remote;
+    if (getSeen() === remote) return;  // already up-to-date on this device
+    const n = ensureBanner();
+    armBanner(n);
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', check, { once:true });
+  } else {
+    check();
+  }
+  document.addEventListener('visibilitychange', function(){
+    if (document.visibilityState === 'visible') check();
+  });
+  setInterval(check, 15*60*1000);
+})();
+</script>
+
+</body>
+</html>

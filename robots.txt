@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://snowremote.github.io/oxyaudit/sitemap.xml
