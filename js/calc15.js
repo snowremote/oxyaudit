@@ -770,10 +770,7 @@ function formatShareMessage(message, instructions) {
 }
 
 function buildSharePayload() {
-  const langData = getLangData15();
   return {
-    title: document.title || (langData?.strings?.heading) || 'Oxyaudit',
-    text: 'OxyAudit Helper App',
     url: getShareUrl()
   };
 }
