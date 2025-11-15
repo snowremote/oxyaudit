@@ -43,13 +43,63 @@ const settingsDescription = document.getElementById("settings-description");
 const settingsLegend = document.getElementById("settings-language-legend");
 const settingsClose = document.getElementById("settings-close");
 const settingsGear = document.getElementById("settings-gear");
+const shareButton = document.getElementById("share-button");
 const languageRadios = document.querySelectorAll("input[name='calc15-language']");
 const updateNoticeEl = document.getElementById("update-notice");
+const shareOverlay = document.getElementById("share-overlay");
+const shareOverlayText = document.getElementById("share-overlay-text");
+const shareOverlayShare = document.getElementById("share-overlay-share");
+const shareOverlayCancel = document.getElementById("share-overlay-cancel");
 const RELOAD_BANNER_PAUSE_MS = 1000; // 1s visual confirmation before reload
 
 // === 2.1 LANGUAGE SUPPORT ===
 const LANGUAGE_KEY_15 = 'calc15.language';
 const DEFAULT_LANGUAGE_15 = 'en-GB';
+const SHARE_INSTRUCTION_PLACEHOLDER = '{instructions}';
+const DEFAULT_SHARE_MESSAGE = 'Use Share to send this helper to friends. To save it on your device: {instructions}';
+const ADD_TO_HOME_INSTRUCTIONS = {
+  'en-GB': {
+    ios: "Tap Safari's share icon (square with arrow) and choose 'Add to Home Screen'.",
+    android: "Open your browser menu (⋮) and choose 'Add to Home screen', then confirm."
+  },
+  'nb-NO': {
+    ios: "Trykk på Safari sin Del-knapp (firkant med pil) og velg «Legg til på Hjem-skjerm».",
+    android: "Åpne nettleserens meny (⋮) og velg «Legg til på hjemskjermen», bekreft deretter."
+  },
+  'nn-NO': {
+    ios: "Trykk på Safari sin Del-knapp (firkant med pil) og velg «Legg til på heimskjermen».",
+    android: "Opna nettlesaren sin meny (⋮) og vel «Legg til på heimskjermen», stadfest deretter."
+  },
+  'sv-SE': {
+    ios: "Tryck på Safaris Dela-ikon (fyrkant med pil) och välj 'Lägg till på hemskärmen'.",
+    android: "Öppna webbläsarens meny (⋮) och välj 'Lägg till på startskärmen', bekräfta sedan."
+  },
+  'da-DK': {
+    ios: "Tryk på Safaris Del-ikon (firkant med pil) og vælg 'Føj til hjemmeskærm'.",
+    android: "Åbn browserens menu (⋮) og vælg 'Tilføj til startskærm', bekræft derefter."
+  },
+  'fi-FI': {
+    ios: "Napauta Safarin Jaa-kuvaketta (neliö nuolella) ja valitse 'Lisää aloitusnäytölle'.",
+    android: "Avaa selaimen valikko (⋮) ja valitse 'Lisää aloitusnäytölle', vahvista sitten."
+  },
+  'es-ES': {
+    ios: "Pulsa el icono Compartir de Safari (cuadrado con flecha) y elige 'Añadir a pantalla de inicio'.",
+    android: "Abre el menú del navegador (⋮) y elige 'Añadir a pantalla de inicio', confirma después."
+  },
+  'fr-FR': {
+    ios: "Appuyez sur l'icône Partager de Safari (carré avec flèche) et choisissez « Ajouter à l'écran d'accueil ». ",
+    android: "Ouvrez le menu du navigateur (⋮) et choisissez « Ajouter à l'écran d'accueil », puis confirmez."
+  },
+  'it-IT': {
+    ios: "Tocca l'icona Condividi di Safari (quadrato con freccia) e scegli 'Aggiungi a Home'.",
+    android: "Apri il menu del browser (⋮) e scegli 'Aggiungi a schermata Home', poi conferma."
+  },
+  'de-DE': {
+    ios: "Tippen Sie auf das Teilen-Symbol von Safari (Quadrat mit Pfeil) und wählen Sie 'Zum Home-Bildschirm'.",
+    android: "Öffnen Sie das Browser-Menü (⋮) und wählen Sie 'Zum Startbildschirm', bestätigen Sie danach."
+  }
+};
+
 const LANGUAGE_DATA_15 = {
   'en-GB': {
     locale: 'en-GB',
@@ -77,6 +127,11 @@ const LANGUAGE_DATA_15 = {
       clearButton: 'Clear',
       clearAria: 'Clear all counts',
       updateNotice: '🔄 NurseCalc is being updated...',
+      shareNotification: {
+        message: 'Use Share to send this helper to friends. To save it on your device: {instructions}',
+        shareButton: 'Share...',
+        cancelButton: 'Cancel'
+      },
       settings: {
         title: 'Settings',
         description: 'Choose your preferred language for this calculator.',
@@ -128,6 +183,11 @@ const LANGUAGE_DATA_15 = {
       clearButton: 'Nullstill',
       clearAria: 'Nullstill alle tellinger',
       updateNotice: '🔄 NurseCalc oppdateres...',
+      shareNotification: {
+        message: 'Bruk Del for å sende dette verktøyet til venner. For å lagre det på enheten: {instructions}',
+        shareButton: 'Del',
+        cancelButton: 'Avbryt'
+      },
       settings: {
         title: 'Innstillinger',
         description: 'Velg ønsket språk for denne kalkulatoren.',
@@ -179,6 +239,11 @@ const LANGUAGE_DATA_15 = {
       clearButton: 'Nullstill',
       clearAria: 'Nullstill alle teljingane',
       updateNotice: '🔄 NurseCalc blir oppdatert...',
+      shareNotification: {
+        message: 'Bruk Del for å sende dette verktøyet til venner. For å lagre det på enheten: {instructions}',
+        shareButton: 'Del',
+        cancelButton: 'Avbryt'
+      },
       settings: {
         title: 'Innstillingar',
         description: 'Vel språket du vil bruke for denne kalkulatoren.',
@@ -230,6 +295,11 @@ const LANGUAGE_DATA_15 = {
       clearButton: 'Nollställ',
       clearAria: 'Nollställ alla räkningar',
       updateNotice: '🔄 NurseCalc uppdateras...',
+      shareNotification: {
+        message: 'Använd Dela för att skicka det här verktyget till vänner. För att spara det: {instructions}',
+        shareButton: 'Dela',
+        cancelButton: 'Avbryt'
+      },
       settings: {
         title: 'Inställningar',
         description: 'Välj vilket språk du vill använda för den här kalkylatorn.',
@@ -281,6 +351,11 @@ const LANGUAGE_DATA_15 = {
       clearButton: 'Nulstil',
       clearAria: 'Nulstil alle optællinger',
       updateNotice: '🔄 NurseCalc opdateres...',
+      shareNotification: {
+        message: 'Brug Del for at sende dette værktøj til venner. For at gemme det: {instructions}',
+        shareButton: 'Del',
+        cancelButton: 'Annuller'
+      },
       settings: {
         title: 'Indstillinger',
         description: 'Vælg dit foretrukne sprog til denne beregner.',
@@ -332,6 +407,11 @@ const LANGUAGE_DATA_15 = {
       clearButton: 'Tyhjennä',
       clearAria: 'Tyhjennä kaikki valinnat',
       updateNotice: '🔄 NurseCalc päivittyy...',
+      shareNotification: {
+        message: 'Käytä Jaa-toimintoa lähettääksesi tämän työkalun ystäville. Tallentaaksesi sen: {instructions}',
+        shareButton: 'Jaa',
+        cancelButton: 'Peruuta'
+      },
       settings: {
         title: 'Asetukset',
         description: 'Valitse tämän laskurin käyttämä kieli.',
@@ -383,6 +463,11 @@ const LANGUAGE_DATA_15 = {
       clearButton: 'Restablecer',
       clearAria: 'Restablecer todos los conteos',
       updateNotice: '🔄 NurseCalc se está actualizando...',
+      shareNotification: {
+        message: 'Usa Compartir para enviar esta herramienta a tus amigos. Para guardarla: {instructions}',
+        shareButton: 'Compartir',
+        cancelButton: 'Cancelar'
+      },
       settings: {
         title: 'Configuración',
         description: 'Elige el idioma que quieres usar en esta calculadora.',
@@ -434,6 +519,11 @@ const LANGUAGE_DATA_15 = {
       clearButton: 'Réinitialiser',
       clearAria: 'Réinitialiser tous les comptages',
       updateNotice: '🔄 NurseCalc est en cours de mise à jour...',
+      shareNotification: {
+        message: 'Utilisez Partager pour envoyer cet outil à vos amis. Pour l\'enregistrer : {instructions}',
+        shareButton: 'Partager',
+        cancelButton: 'Annuler'
+      },
       settings: {
         title: 'Paramètres',
         description: 'Choisissez la langue à utiliser pour cette calculatrice.',
@@ -485,6 +575,11 @@ const LANGUAGE_DATA_15 = {
       clearButton: 'Azzera',
       clearAria: 'Azzera tutti i conteggi',
       updateNotice: '🔄 NurseCalc è in aggiornamento...',
+      shareNotification: {
+        message: 'Usa Condividi per inviare questo strumento agli amici. Per salvarlo: {instructions}',
+        shareButton: 'Condividi',
+        cancelButton: 'Annulla'
+      },
       settings: {
         title: 'Impostazioni',
         description: 'Scegli la lingua da usare per questa calcolatrice.',
@@ -536,6 +631,11 @@ const LANGUAGE_DATA_15 = {
       clearButton: 'Zurücksetzen',
       clearAria: 'Alle Zählungen zurücksetzen',
       updateNotice: '🔄 NurseCalc wird aktualisiert...',
+      shareNotification: {
+        message: 'Verwenden Sie Teilen, um dieses Tool an Freunde zu senden. Um es zu speichern: {instructions}',
+        shareButton: 'Teilen',
+        cancelButton: 'Abbrechen'
+      },
       settings: {
         title: 'Einstellungen',
         description: 'Wähle die Sprache für diesen Rechner.',
@@ -565,6 +665,30 @@ const LANGUAGE_DATA_15 = {
 
 let currentLanguage15 = DEFAULT_LANGUAGE_15;
 let integerFormatter15 = new Intl.NumberFormat(LANGUAGE_DATA_15[DEFAULT_LANGUAGE_15].locale, { maximumFractionDigits: 0 });
+let shareOverlayOpenedAt = 0;
+
+async function tryHostShare(payload) {
+  if (!window.top || window.top === window) return false;
+  const topNavigator = window.top.navigator;
+  if (topNavigator && typeof topNavigator.share === 'function') {
+    try {
+      await topNavigator.share(payload);
+      return true;
+    } catch (err) {
+      if (err && (err.name === 'AbortError' || err.name === 'NotAllowedError')) {
+        return true;
+      }
+      console.warn('Oxyaudit host navigator.share failed:', err);
+    }
+  }
+  try {
+    window.top.postMessage({ type: 'oxy-share-request', payload }, '*');
+    return true;
+  } catch (err) {
+    console.warn('Oxyaudit unable to postMessage host for sharing:', err);
+  }
+  return false;
+}
 
 // Mark as embedded when shown inside index.html's iframe
 if (window.top !== window.self) {
@@ -599,6 +723,81 @@ function applyFooterText15(langData) {
   const copyright = document.getElementById('footer-copyright');
   if (copyright && footerStrings.copyrightHtml) {
     copyright.innerHTML = footerStrings.copyrightHtml;
+  }
+}
+
+function showShareOverlay() {
+  if (!shareOverlay) return;
+  shareOverlay.classList.add('visible');
+  shareOverlay.removeAttribute('aria-hidden');
+  shareOverlayShare?.focus();
+  document.body.classList.add('share-overlay-visible');
+  shareOverlayOpenedAt = Date.now();
+}
+
+function hideShareOverlay() {
+  if (!shareOverlay) return;
+  shareOverlay.classList.remove('visible');
+  shareOverlay.setAttribute('aria-hidden', 'true');
+  document.body.classList.remove('share-overlay-visible');
+  shareButton?.focus();
+}
+
+function isIOSPlatform() {
+  const ua = navigator.userAgent || navigator.vendor || window.opera || '';
+  const platform = navigator.platform || '';
+  const isIOSDevice = /iPad|iPhone|iPod/.test(ua);
+  const isMacTouch = platform === 'MacIntel' && navigator.maxTouchPoints > 1;
+  return isIOSDevice || isMacTouch;
+}
+
+function getAddToHomeInstructions(locale) {
+  const key = locale && ADD_TO_HOME_INSTRUCTIONS[locale] ? locale : 'en-GB';
+  const entry = ADD_TO_HOME_INSTRUCTIONS[key] || ADD_TO_HOME_INSTRUCTIONS['en-GB'];
+  const channel = isIOSPlatform() ? 'ios' : 'android';
+  return entry[channel] || entry.ios || entry.android || '';
+}
+
+function formatShareMessage(message, instructions) {
+  const base = message || DEFAULT_SHARE_MESSAGE;
+  if (base.includes(SHARE_INSTRUCTION_PLACEHOLDER)) {
+    return base.replace(SHARE_INSTRUCTION_PLACEHOLDER, instructions || '');
+  }
+  if (instructions) {
+    return `${base} ${instructions}`;
+  }
+  return base;
+}
+
+function buildSharePayload() {
+  const langData = getLangData15();
+  const shareStrings = langData?.strings?.shareNotification || {};
+  const instructions = getAddToHomeInstructions(langData.locale);
+  const text = formatShareMessage(shareStrings.message || DEFAULT_SHARE_MESSAGE, instructions);
+  return {
+    title: document.title || (langData?.strings?.heading) || 'Oxyaudit',
+    text,
+    url: window.location?.href || 'https://louka.net/oxyaudit/'
+  };
+}
+
+async function tryNativeShare() {
+  const payload = buildSharePayload();
+  if (await tryHostShare(payload)) {
+    return true;
+  }
+  if (!navigator.share || typeof navigator.share !== 'function') {
+    return false;
+  }
+  try {
+    await navigator.share(payload);
+    return true;
+  } catch (err) {
+    if (err && (err.name === 'AbortError' || err.name === 'NotAllowedError')) {
+      return true;
+    }
+    console.warn('Oxyaudit share failed:', err);
+    return false;
   }
 }
 
@@ -645,6 +844,21 @@ function applyStaticText15(langData) {
   }
   if (updateNoticeEl && strings.updateNotice) {
     updateNoticeEl.textContent = strings.updateNotice;
+  }
+  const shareStrings = strings.shareNotification || {};
+  const shareMessage = formatShareMessage(shareStrings.message || DEFAULT_SHARE_MESSAGE, getAddToHomeInstructions(langData.locale));
+  if (shareOverlayText) {
+    shareOverlayText.textContent = shareMessage;
+  }
+  if (shareOverlayShare) {
+    const shareLabel = shareStrings.shareButton || 'Share...';
+    shareOverlayShare.textContent = shareLabel;
+    shareOverlayShare.setAttribute('aria-label', shareLabel);
+  }
+  if (shareOverlayCancel) {
+    const cancelLabel = shareStrings.cancelButton || 'Cancel';
+    shareOverlayCancel.textContent = cancelLabel;
+    shareOverlayCancel.setAttribute('aria-label', cancelLabel);
   }
 
   document.querySelectorAll('[data-aria-key]').forEach((el) => {
@@ -922,9 +1136,44 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
+  const shareOverlayHandler = (event) => {
+    event.preventDefault();
+    showShareOverlay();
+  };
+  shareButton?.addEventListener('click', shareOverlayHandler);
+  shareButton?.addEventListener('touchend', shareOverlayHandler, { passive: false });
+  shareButton?.addEventListener('touchstart', shareOverlayHandler, { passive: false });
+
+  shareOverlayCancel?.addEventListener('click', (event) => {
+    event.preventDefault();
+    hideShareOverlay();
+  });
+
+  shareOverlayShare?.addEventListener('click', async (event) => {
+    event.preventDefault();
+    const shared = await tryNativeShare();
+    if (!shared) {
+      window.alert('Sharing is not available on this browser. Use your browser menu to share or add to your home screen.');
+    }
+    hideShareOverlay();
+  });
+
+  shareOverlay?.addEventListener('click', (event) => {
+    if (event.target === shareOverlay) {
+      if (Date.now() - shareOverlayOpenedAt < 250) return;
+      hideShareOverlay();
+    }
+  });
+
   document.addEventListener('keydown', (event) => {
     if (event.key === 'Escape' && document.body.classList.contains('showing-settings')) {
       closeSettings15();
+    }
+  });
+
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && shareOverlay?.classList.contains('visible')) {
+      hideShareOverlay();
     }
   });
 

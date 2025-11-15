@@ -8,14 +8,14 @@
   <meta name="theme-color" content="#14282F">
 
   <!-- Use relative paths so this works at /oxyaudit/ and on GitHub Pages -->
-  <link rel="stylesheet" href="./css/style.css?v=20251002-01">
+  <link rel="stylesheet" href="./css/style.css?v=20251002-05">
 
   <!-- Local icons (kept relative) -->
   <link rel="icon" href="./favicon.ico">
   <link rel="apple-touch-icon" href="./icons/app-180.png">
 
   <!-- NEW: Web App Manifest (optional but recommended) -->
-  <link rel="manifest" href="./manifest.webmanifest?v=20251002-01">
+  <link rel="manifest" href="./manifest.webmanifest?v=20251002-05">
 
   <style>
     /* Behaviour identical to your original; only paths changed */
@@ -45,7 +45,7 @@
   <!-- IMPORTANT: iframe now uses a RELATIVE src -->
   <iframe
     id="frameHost"
-    src="./calc15.html?v=20251002-01"
+    src="./calc15.html?v=20251002-05"
     title="Opioid dose audit calculator"
     loading="eager"
     referrerpolicy="same-origin"
@@ -214,6 +214,22 @@
 
     iframe.addEventListener('load', handleFrameLoad);
 
+    window.addEventListener('message', (event) => {
+      const data = event?.data;
+      if (!data || typeof data !== 'object') return;
+      if (event.origin && event.origin !== window.location.origin) return;
+      if (data.type === 'oxy-share-request') {
+        const payload = data.payload || {};
+        if (navigator.share && typeof navigator.share === 'function') {
+          navigator.share(payload).catch((err) => {
+            console.warn('Oxyaudit host share failed:', err);
+          });
+        } else if (payload.url && navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(payload.url).catch(() => {});
+        }
+      }
+    });
+
     if (iframe.contentDocument && iframe.contentDocument.readyState === 'complete') {
       setTimeout(handleFrameLoad, 0);
     }
@@ -227,9 +243,9 @@
    On tap: unregister SW, clear caches, mark version as seen, hard reload with cache-buster. */
 (function(){
   'use strict';
-  var LS_KEY = 'oxyaudit.lastSeenVersion';
-  var BANNER_ID = 'update-notice';
-  var MSG = 'Update available — tap to update now.';
+      var LS_KEY = 'oxyaudit.lastSeenVersion';
+      var BANNER_ID = 'update-notice';
+      var MSG = 'Update available — tap to update now.';
   var remoteVersion = null;
   var armed = false;
 
@@ -296,14 +312,19 @@
     }catch(_){ return null; }
   }
 
-  async function check(){
-    const remote = await fetchRemote();
-    if (!remote) return;
-    remoteVersion = remote;
-    if (getSeen() === remote) return;  // already up-to-date on this device
-    const n = ensureBanner();
-    armBanner(n);
-  }
+    async function check(){
+      const remote = await fetchRemote();
+      if (!remote) return;
+      remoteVersion = remote;
+      const seenVersion = getSeen();
+      if (!seenVersion) {
+        setSeen(remote);
+        return;
+      }
+      if (seenVersion === remote) return;  // already up-to-date on this device
+      const n = ensureBanner();
+      armBanner(n);
+    }
 
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', check, { once:true });
