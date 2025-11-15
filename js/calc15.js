@@ -771,14 +771,33 @@ function formatShareMessage(message, instructions) {
 
 function buildSharePayload() {
   const langData = getLangData15();
-  const shareStrings = langData?.strings?.shareNotification || {};
-  const instructions = getAddToHomeInstructions(langData.locale);
-  const text = formatShareMessage(shareStrings.message || DEFAULT_SHARE_MESSAGE, instructions);
   return {
     title: document.title || (langData?.strings?.heading) || 'Oxyaudit',
-    text,
-    url: window.location?.href || 'https://louka.net/oxyaudit/'
+    text: 'OxyAudit Helper App',
+    url: getShareUrl()
   };
+}
+
+function getShareUrl() {
+  try {
+    const url = new URL(window.location.href);
+    url.search = '';
+    url.hash = '';
+    let path = url.pathname || '/';
+    path = path.replace(/calc15\.html?\/?$/i, '/');
+    path = path.replace(/\.html?\/?$/i, '/');
+    path = path.replace(/\/+/g, '/');
+    if (!path.endsWith('/')) {
+      path += '/';
+    }
+    if (path === '//') {
+      path = '/';
+    }
+    url.pathname = path;
+    return url.toString();
+  } catch (_) {
+    return 'https://louka.net/oxyaudit/';
+  }
 }
 
 async function tryNativeShare() {
