@@ -975,8 +975,6 @@ body.page-calc15 #site-header .site-title.oxy-title{
 #result:not(:empty) { display: block !important; }
 .calculator:has(#result:not(:empty)) #clear-container { display: flex !important; }
 
-/* === OXYAUDIT: Settings sheet visibility guard =========================== */
-body.page-calc15.showing-settings #settings-panel { display: block !important; }
 
 /* === Update banner (single authoritative) === */
 #update-notice{
@@ -1311,3 +1309,7 @@ body.page-calc15.showing-settings #settings-panel{
 body.page-calc15.showing-settings .calculator{
   display: none !important;
 }
+
+/* Settings panel: hidden by default, shown only when toggled */
+body.page-calc15 #settings-panel{ display:none !important; }
+body.page-calc15.showing-settings #settings-panel{ display:block !important; }
