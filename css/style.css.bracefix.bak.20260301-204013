@@ -1028,6 +1028,7 @@ body.mobile-focus-mode #update-notice.visible { display:block !important; }
   transform: none !important;
 }
 #update-notice.visible{ display: block !important; }
+# paste the CSS above
 
 /* === OXYAUDIT: authoritative update banner (final override) ============== */
 #update-notice.visible{
@@ -1061,20 +1062,19 @@ body.mobile-focus-mode #update-notice.visible{ display:block !important; }
   transform:none !important;
 }
 /* Guard against any base “hide” rules */
-#update-notice { opacity:1 !important; visibility:visible !important; }
+#update-notice{ opacity:1 !important; visibility:visible !important; }
 /* Even in mobile-focus mode, keep it visible if it’s marked visible */
-body.mobile-focus-mode #update-notice.visible { display:block !important; }
-}
-}
+body.mobile-focus-mode #update-notice.visible{ display:block !important; }
 
 /* =============================
-   Calc15 additions (from NurseCalc)
+   Calc15 additions (synced from NurseCalc)
    - Quick total input row (top)
-   - “Audit” layer overlay
-   - Calc15 selected colour (teal)
+   - New “Audit” layer overlay
+   - Calc15-only selected colour (teal)
+   Scoped to body.calc15 to avoid impacting other pages.
 ============================= */
 
-/* Calc15 selected state: teal */
+/* Calc15 selected state: teal (not global green) */
 body.calc15 .toggle-button.selected,
 body.calc15 .rate-button.selected,
 body.calc15 .calculator button.selected {
@@ -1092,11 +1092,13 @@ body.calc15 .calc15-quick-total-top {
   gap: 0.35rem;
   margin: 0.1rem 0 0.5rem;
 }
+
 body.calc15 .calc15-quick-total-options {
   display: inline-flex;
   align-items: center;
   gap: 0.22rem;
 }
+
 body.calc15 .calc15-quick-allow-button {
   min-width: 2.35rem !important;
   padding: 0.2rem 0.35rem !important;
@@ -1104,6 +1106,7 @@ body.calc15 .calc15-quick-allow-button {
   line-height: 1.1;
   border-radius: 6px !important;
 }
+
 body.calc15 #calc15-total-quick-input {
   width: 9.5rem !important;
   max-width: 100%;
@@ -1118,6 +1121,7 @@ body.calc15 #calc15-total-quick-input {
   text-align: right;
   box-sizing: border-box;
 }
+
 @media (max-width: 420px) {
   body.calc15 .calc15-quick-total-top { gap: 0.25rem; }
   body.calc15 .calc15-quick-allow-button {
@@ -1127,8 +1131,9 @@ body.calc15 #calc15-total-quick-input {
   }
 }
 
-/* Audit layer overlay */
+/* New layer overlay */
 body.calc15.calc15-new-layer-open { overflow: hidden; }
+
 body.calc15 .calc15-new-layer {
   position: fixed;
   inset: 0;
@@ -1138,13 +1143,16 @@ body.calc15 .calc15-new-layer {
   align-items: flex-start;
   padding: calc(env(safe-area-inset-top, 0px) + 0.85rem) 0.75rem 1rem;
 }
+
 body.calc15 .calc15-new-layer[hidden] { display: none; }
+
 body.calc15 .calc15-new-layer-backdrop {
   position: absolute;
   inset: 0;
   background: rgba(19, 28, 32, 0.56);
   backdrop-filter: blur(1px);
 }
+
 body.calc15 .calc15-new-layer-panel {
   position: relative;
   z-index: 1;
@@ -1158,6 +1166,7 @@ body.calc15 .calc15-new-layer-panel {
   color: #102027;
   padding: 0.95rem 0.85rem 0.75rem;
 }
+
 body.calc15 .calc15-new-layer-title {
   margin: 0.05rem 2.2rem 0.4rem 0.2rem;
   text-align: left;
@@ -1165,6 +1174,7 @@ body.calc15 .calc15-new-layer-title {
   font-weight: 650;
   color: #17333d;
 }
+
 body.calc15 .calc15-new-layer-close {
   position: absolute;
   top: 0.55rem;
@@ -1182,11 +1192,13 @@ body.calc15 .calc15-new-layer-close {
   justify-content: center;
   cursor: pointer;
 }
+
 body.calc15 .calc15-new-layer-close:hover,
 body.calc15 .calc15-new-layer-close:focus-visible {
   background: #ffffff;
   outline: none;
 }
+
 body.calc15 .calc15-new-input-card,
 body.calc15 .calc15-new-summary-card {
   padding: 0.55rem 0.65rem !important;
@@ -1195,6 +1207,7 @@ body.calc15 .calc15-new-summary-card {
   margin-right: auto;
   align-items: stretch !important;
 }
+
 body.calc15 .calc15-new-field {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 136px;
@@ -1204,6 +1217,7 @@ body.calc15 .calc15-new-field {
   width: 100%;
   box-sizing: border-box;
 }
+
 body.calc15 .calc15-new-field label {
   margin: 0 !important;
   text-align: left !important;
@@ -1211,6 +1225,7 @@ body.calc15 .calc15-new-field label {
   font-size: 1rem !important;
   color: #15333a;
 }
+
 body.calc15 .calc15-new-field input {
   width: 100%;
   min-width: 0;
@@ -1224,12 +1239,15 @@ body.calc15 .calc15-new-field input {
   text-align: right;
   box-sizing: border-box;
 }
+
 body.calc15 .calc15-new-field input:focus {
   outline: none;
   border-color: #2f6d7a;
   box-shadow: 0 0 0 2px rgba(47, 109, 122, 0.18);
 }
+
 body.calc15 .calc15-new-summary { margin-top: 0.55rem; }
+
 body.calc15 .calc15-new-summary-row {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 136px;
@@ -1238,11 +1256,13 @@ body.calc15 .calc15-new-summary-row {
   width: 100%;
   box-sizing: border-box;
 }
+
 body.calc15 .calc15-new-summary-row + .calc15-new-summary-row {
   margin-top: 0.38rem;
   padding-top: 0.45rem;
   border-top: 1px dashed rgba(20, 52, 60, 0.28);
 }
+
 body.calc15 .calc15-new-summary-label {
   text-align: left;
   font-weight: 600;
@@ -1250,6 +1270,7 @@ body.calc15 .calc15-new-summary-label {
   text-transform: uppercase;
   letter-spacing: 0.01em;
 }
+
 body.calc15 .calc15-new-summary-value {
   text-align: right;
   font-weight: 700;
@@ -1257,6 +1278,7 @@ body.calc15 .calc15-new-summary-value {
   color: #0f2430;
   white-space: nowrap;
 }
+
 @media (max-width: 460px) {
   body.calc15 .calc15-new-layer-panel { padding: 0.8rem 0.6rem 0.7rem; }
   body.calc15 .calc15-new-field { grid-template-columns: minmax(0, 1fr) 122px; gap: 0.45rem; }

@@ -1,5 +1,13 @@
+// embed-flag
+if (typeof window !== "undefined" && window.top !== window.self) {
+  document.documentElement.classList.add("embedded");
+  document.addEventListener("DOMContentLoaded", () => document.body.classList.add("embedded"));
+}
+
+// SPDX-License-Identifier: Apache-2.0
+//
 // ============================================================================
-// calc15.js — Opioid Audit Counting Helper (No-0, Compact, No Scroll)
+// calc15.js — OxyNorm & OxyContin Counting Helper (No-0, Compact, No Scroll)
 // ============================================================================
 
 // === 1. CONSTANTS ===
@@ -7,7 +15,6 @@ const TABLETS_PER_TRAY = 14;
 const MAX_98_BOXES = 5;
 const MAX_28_BOXES = 7;
 const MAX_TRAYS = 6;
-// Allow up to 15 single tablets/capsules
 const MAX_EXTRA_TABLETS = 15;
 
 // === 2. DOM ELEMENT REFERENCES ===
@@ -23,6 +30,7 @@ const resultBox = document.querySelector(".result");
 const resultDivider = document.querySelector(".result-divider");
 const clearContainer = document.getElementById("clear-container");
 const calcHeadingEl = document.getElementById("calc-heading");
+const appbarTitle = document.getElementById("appbar-title");
 const labelBox98 = document.getElementById("label-box98");
 const labelBox28 = document.getElementById("label-box28");
 const labelTray = document.getElementById("label-tray");
@@ -35,62 +43,63 @@ const settingsDescription = document.getElementById("settings-description");
 const settingsLegend = document.getElementById("settings-language-legend");
 const settingsClose = document.getElementById("settings-close");
 const settingsGear = document.getElementById("settings-gear");
+const shareButton = document.getElementById("share-button");
 const languageRadios = document.querySelectorAll("input[name='calc15-language']");
 const updateNoticeEl = document.getElementById("update-notice");
-const quickTotalInput = document.getElementById("calc15-total-quick-input");
-const quickTotalOptionsGroup = document.getElementById("calc15-quick-total-options");
-const quickAllow98Button = document.getElementById("calc15-quick-allow-98");
-const quickAllow28Button = document.getElementById("calc15-quick-allow-28");
-const newPageOpenButton = document.getElementById("calc15-new-page-open");
-const newLayer = document.getElementById("calc15-new-layer");
-const newLayerCloseButton = document.getElementById("calc15-new-layer-close");
-const newLayerTitleEl = document.getElementById("calc15-new-layer-title");
-const newLayerLabelStart = document.getElementById("calc15-new-label-start");
-const newLayerLabelInn = document.getElementById("calc15-new-label-inn");
-const newLayerLabelUt = document.getElementById("calc15-new-label-ut");
-const newLayerLabelKassert = document.getElementById("calc15-new-label-kassert");
-const newLayerLabelRest = document.getElementById("calc15-new-label-rest");
-const newLayerSummaryContainer = document.getElementById("calc15-new-summary");
-const newLayerSummaryLabelRest = document.getElementById("calc15-new-summary-label-rest");
-const newLayerSummaryLabelTheoretical = document.getElementById("calc15-new-summary-label-theoretical");
-const newLayerSummaryLabelDifference = document.getElementById("calc15-new-summary-label-difference");
-const newLayerSummaryRest = document.getElementById("calc15-new-summary-rest");
-const newLayerSummaryTheoretical = document.getElementById("calc15-new-summary-theoretical");
-const newLayerSummaryDifference = document.getElementById("calc15-new-summary-difference");
-const newLayerInputs = {
-  start: document.getElementById("calc15-new-start"),
-  inn: document.getElementById("calc15-new-inn"),
-  ut: document.getElementById("calc15-new-ut"),
-  kassert: document.getElementById("calc15-new-kassert"),
-  rest: document.getElementById("calc15-new-rest")
-};
-
-const NEW_PAGE_STRINGS_15 = {
-  openButton: "Audit",
-  title: "Audit",
-  closeAria: "Close audit layer",
-  quickInputPlaceholder: "No. tablets",
-  quickInputAria: "Quick total input",
-  quickAvailabilityAria: "Box size availability",
-  allow98Aria: "Use 98-boxes in autofill",
-  allow28Aria: "Use 28-boxes in autofill",
-  labels: {
-    start: "Opening stock",
-    inn: "Number IN",
-    ut: "Number OUT",
-    kassert: "Number DISCARDED",
-    rest: "Remaining stock"
-  },
-  summary: {
-    rest: "REMAINING STOCK",
-    theoretical: "THEORETICAL REMAINING STOCK",
-    difference: "DIFFERENCE"
-  }
-};
+const shareOverlay = document.getElementById("share-overlay");
+const shareOverlayText = document.getElementById("share-overlay-text");
+const shareOverlayShare = document.getElementById("share-overlay-share");
+const shareOverlayCancel = document.getElementById("share-overlay-cancel");
+const RELOAD_BANNER_PAUSE_MS = 1000; // 1s visual confirmation before reload
 
 // === 2.1 LANGUAGE SUPPORT ===
 const LANGUAGE_KEY_15 = 'calc15.language';
 const DEFAULT_LANGUAGE_15 = 'en-GB';
+const SHARE_INSTRUCTION_PLACEHOLDER = '{instructions}';
+const DEFAULT_SHARE_MESSAGE = 'Use Share to send this helper to friends. To save it on your device: {instructions}';
+const ADD_TO_HOME_INSTRUCTIONS = {
+  'en-GB': {
+    ios: "Tap Safari's share icon (square with arrow) and choose 'Add to Home Screen'.",
+    android: "Open your browser menu (⋮) and choose 'Add to Home screen', then confirm."
+  },
+  'nb-NO': {
+    ios: "Trykk på Safari sin Del-knapp (firkant med pil) og velg «Legg til på Hjem-skjerm».",
+    android: "Åpne nettleserens meny (⋮) og velg «Legg til på hjemskjermen», bekreft deretter."
+  },
+  'nn-NO': {
+    ios: "Trykk på Safari sin Del-knapp (firkant med pil) og velg «Legg til på heimskjermen».",
+    android: "Opna nettlesaren sin meny (⋮) og vel «Legg til på heimskjermen», stadfest deretter."
+  },
+  'sv-SE': {
+    ios: "Tryck på Safaris Dela-ikon (fyrkant med pil) och välj 'Lägg till på hemskärmen'.",
+    android: "Öppna webbläsarens meny (⋮) och välj 'Lägg till på startskärmen', bekräfta sedan."
+  },
+  'da-DK': {
+    ios: "Tryk på Safaris Del-ikon (firkant med pil) og vælg 'Føj til hjemmeskærm'.",
+    android: "Åbn browserens menu (⋮) og vælg 'Tilføj til startskærm', bekræft derefter."
+  },
+  'fi-FI': {
+    ios: "Napauta Safarin Jaa-kuvaketta (neliö nuolella) ja valitse 'Lisää aloitusnäytölle'.",
+    android: "Avaa selaimen valikko (⋮) ja valitse 'Lisää aloitusnäytölle', vahvista sitten."
+  },
+  'es-ES': {
+    ios: "Pulsa el icono Compartir de Safari (cuadrado con flecha) y elige 'Añadir a pantalla de inicio'.",
+    android: "Abre el menú del navegador (⋮) y elige 'Añadir a pantalla de inicio', confirma después."
+  },
+  'fr-FR': {
+    ios: "Appuyez sur l'icône Partager de Safari (carré avec flèche) et choisissez « Ajouter à l'écran d'accueil ». ",
+    android: "Ouvrez le menu du navigateur (⋮) et choisissez « Ajouter à l'écran d'accueil », puis confirmez."
+  },
+  'it-IT': {
+    ios: "Tocca l'icona Condividi di Safari (quadrato con freccia) e scegli 'Aggiungi a Home'.",
+    android: "Apri il menu del browser (⋮) e scegli 'Aggiungi a schermata Home', poi conferma."
+  },
+  'de-DE': {
+    ios: "Tippen Sie auf das Teilen-Symbol von Safari (Quadrat mit Pfeil) und wählen Sie 'Zum Home-Bildschirm'.",
+    android: "Öffnen Sie das Browser-Menü (⋮) und wählen Sie 'Zum Startbildschirm', bestätigen Sie danach."
+  }
+};
+
 const LANGUAGE_DATA_15 = {
   'en-GB': {
     locale: 'en-GB',
@@ -118,6 +127,11 @@ const LANGUAGE_DATA_15 = {
       clearButton: 'Clear',
       clearAria: 'Clear all counts',
       updateNotice: '🔄 NurseCalc is being updated...',
+      shareNotification: {
+        message: 'Use Share to send this helper to friends. To save it on your device: {instructions}',
+        shareButton: 'Share...',
+        cancelButton: 'Cancel'
+      },
       settings: {
         title: 'Settings',
         description: 'Choose your preferred language for this calculator.',
@@ -140,28 +154,6 @@ const LANGUAGE_DATA_15 = {
       footer: {
         disclaimerHtml: `<strong>Disclaimer</strong><br />This site is not CE-marked and not a medical device.<br />The calculators have not been validated and may contain errors.<br />They must not be used for patient-specific decisions — they are for educational and general guidance only.<br />Always check results yourself and confirm against official guidelines, product information, and clinical judgement.<br />Use entirely at your own risk.<br />`,
         copyrightHtml: '&copy; 2025 Andrew S. Louka'
-      },
-      newPage: {
-        openButton: 'Audit',
-        title: 'Audit',
-        closeAria: 'Close audit layer',
-        quickInputPlaceholder: 'No. tablets',
-        quickInputAria: 'Quick total input',
-        quickAvailabilityAria: 'Box size availability',
-        allow98Aria: 'Use 98-boxes in autofill',
-        allow28Aria: 'Use 28-boxes in autofill',
-        labels: {
-          start: 'Opening stock',
-          inn: 'Number IN',
-          ut: 'Number OUT',
-          kassert: 'Number DISCARDED',
-          rest: 'Remaining stock'
-        },
-        summary: {
-          rest: 'REMAINING STOCK',
-          theoretical: 'THEORETICAL REMAINING STOCK',
-          difference: 'DIFFERENCE'
-        }
       }
     }
   },
@@ -191,6 +183,11 @@ const LANGUAGE_DATA_15 = {
       clearButton: 'Nullstill',
       clearAria: 'Nullstill alle tellinger',
       updateNotice: '🔄 NurseCalc oppdateres...',
+      shareNotification: {
+        message: 'Bruk Del for å sende dette verktøyet til venner. For å lagre det på enheten: {instructions}',
+        shareButton: 'Del',
+        cancelButton: 'Avbryt'
+      },
       settings: {
         title: 'Innstillinger',
         description: 'Velg ønsket språk for denne kalkulatoren.',
@@ -213,28 +210,6 @@ const LANGUAGE_DATA_15 = {
       footer: {
         disclaimerHtml: `<strong>Ansvarsfraskrivelse</strong><br />Dette nettstedet er ikke CE-merket og er ikke et medisinsk utstyr.<br />Kalkulatorene er ikke validert og kan inneholde feil.<br />De må ikke brukes til pasientspesifikke beslutninger — de er kun for opplæring og generell veiledning.<br />Kontroller alltid resultatene selv og bekreft mot offisielle retningslinjer, produktinformasjon og klinisk skjønn.<br />Bruk skjer fullt og helt på eget ansvar.<br />`,
         copyrightHtml: '&copy; 2025 Andrew S. Louka'
-      },
-      newPage: {
-        openButton: 'Revisjon',
-        title: 'Revisjon',
-        closeAria: 'Lukk revisjonslag',
-        quickInputPlaceholder: 'Antall tabletter',
-        quickInputAria: 'Hurtiginntasting av total',
-        quickAvailabilityAria: 'Tilgjengelige eskestørrelser',
-        allow98Aria: 'Bruk 98-esker i autofyll',
-        allow28Aria: 'Bruk 28-esker i autofyll',
-        labels: {
-          start: 'Startbeholdning',
-          inn: 'Antall INN',
-          ut: 'Antall UT',
-          kassert: 'Antall KASSERT',
-          rest: 'Restbeholdning'
-        },
-        summary: {
-          rest: 'RESTBEHOLDNING',
-          theoretical: 'RESTBEHOLDNING TEORETISK',
-          difference: 'DIFFERANSE'
-        }
       }
     }
   },
@@ -264,6 +239,11 @@ const LANGUAGE_DATA_15 = {
       clearButton: 'Nullstill',
       clearAria: 'Nullstill alle teljingane',
       updateNotice: '🔄 NurseCalc blir oppdatert...',
+      shareNotification: {
+        message: 'Bruk Del for å sende dette verktøyet til venner. For å lagre det på enheten: {instructions}',
+        shareButton: 'Del',
+        cancelButton: 'Avbryt'
+      },
       settings: {
         title: 'Innstillingar',
         description: 'Vel språket du vil bruke for denne kalkulatoren.',
@@ -286,28 +266,6 @@ const LANGUAGE_DATA_15 = {
       footer: {
         disclaimerHtml: `<strong>Ansvarsfråskriving</strong><br />Denne nettstaden er ikkje CE-merkt og er ikkje eit medisinsk produkt.<br />Kalkulatorane er ikkje validerte og kan innehalde feil.<br />Dei skal ikkje brukast til pasientspesifikke avgjerder — dei er berre for opplæring og generell rettleiing.<br />Kontroller alltid resultata sjølv og stadfest mot offisielle retningsliner, produktinformasjon og klinisk skjønn.<br />Du bruker tenesta heilt på eige ansvar.<br />`,
         copyrightHtml: '&copy; 2025 Andrew S. Louka'
-      },
-      newPage: {
-        openButton: 'Revisjon',
-        title: 'Revisjon',
-        closeAria: 'Lukk revisjonslag',
-        quickInputPlaceholder: 'Tal tablettar',
-        quickInputAria: 'Snøgg totalinntasting',
-        quickAvailabilityAria: 'Tilgjengelege eskestorleikar',
-        allow98Aria: 'Bruk 98-esker i autofylling',
-        allow28Aria: 'Bruk 28-esker i autofylling',
-        labels: {
-          start: 'Startbehaldning',
-          inn: 'Tal INN',
-          ut: 'Tal UT',
-          kassert: 'Tal KASSERT',
-          rest: 'Restbehaldning'
-        },
-        summary: {
-          rest: 'RESTBEHALDNING',
-          theoretical: 'RESTBEHALDNING TEORETISK',
-          difference: 'DIFFERANSE'
-        }
       }
     }
   },
@@ -337,6 +295,11 @@ const LANGUAGE_DATA_15 = {
       clearButton: 'Nollställ',
       clearAria: 'Nollställ alla räkningar',
       updateNotice: '🔄 NurseCalc uppdateras...',
+      shareNotification: {
+        message: 'Använd Dela för att skicka det här verktyget till vänner. För att spara det: {instructions}',
+        shareButton: 'Dela',
+        cancelButton: 'Avbryt'
+      },
       settings: {
         title: 'Inställningar',
         description: 'Välj vilket språk du vill använda för den här kalkylatorn.',
@@ -359,28 +322,6 @@ const LANGUAGE_DATA_15 = {
       footer: {
         disclaimerHtml: `<strong>Ansvarsfriskrivning</strong><br />Den här webbplatsen är inte CE-märkt och är inte en medicinteknisk produkt.<br />Kalkylatorerna är inte validerade och kan innehålla fel.<br />De får inte användas för patientanpassade beslut — de är endast för utbildning och allmän vägledning.<br />Kontrollera alltid resultaten själv och jämför med officiella riktlinjer, produktinformation och kliniskt omdöme.<br />Användningen sker helt på egen risk.<br />`,
         copyrightHtml: '&copy; 2025 Andrew S. Louka'
-      },
-      newPage: {
-        openButton: 'Revision',
-        title: 'Revision',
-        closeAria: 'Stäng revisionslager',
-        quickInputPlaceholder: 'Antal tabletter',
-        quickInputAria: 'Snabb inmatning av total',
-        quickAvailabilityAria: 'Tillgängliga förpackningsstorlekar',
-        allow98Aria: 'Använd 98-förpackningar i autofyll',
-        allow28Aria: 'Använd 28-förpackningar i autofyll',
-        labels: {
-          start: 'Ingående saldo',
-          inn: 'Antal IN',
-          ut: 'Antal UT',
-          kassert: 'Antal KASSERAT',
-          rest: 'Restsaldo'
-        },
-        summary: {
-          rest: 'RESTSALDO',
-          theoretical: 'RESTSALDO TEORETISK',
-          difference: 'DIFFERENS'
-        }
       }
     }
   },
@@ -410,6 +351,11 @@ const LANGUAGE_DATA_15 = {
       clearButton: 'Nulstil',
       clearAria: 'Nulstil alle optællinger',
       updateNotice: '🔄 NurseCalc opdateres...',
+      shareNotification: {
+        message: 'Brug Del for at sende dette værktøj til venner. For at gemme det: {instructions}',
+        shareButton: 'Del',
+        cancelButton: 'Annuller'
+      },
       settings: {
         title: 'Indstillinger',
         description: 'Vælg dit foretrukne sprog til denne beregner.',
@@ -432,28 +378,6 @@ const LANGUAGE_DATA_15 = {
       footer: {
         disclaimerHtml: `<strong>Ansvarsfraskrivelse</strong><br />Dette websted er ikke CE-mærket og er ikke et medicinsk udstyr.<br />Kalkulatorerne er ikke valideret og kan indeholde fejl.<br />De må ikke bruges til patient-specifikke beslutninger — de er kun til uddannelse og generel vejledning.<br />Kontroller altid resultaterne selv og bekræft dem mod officielle retningslinjer, produktinformation og klinisk skøn.<br />Brug sker helt på eget ansvar.<br />`,
         copyrightHtml: '&copy; 2025 Andrew S. Louka'
-      },
-      newPage: {
-        openButton: 'Revision',
-        title: 'Revision',
-        closeAria: 'Luk revisionslag',
-        quickInputPlaceholder: 'Antal tabletter',
-        quickInputAria: 'Hurtig totalindtastning',
-        quickAvailabilityAria: 'Tilgængelige æskestørrelser',
-        allow98Aria: 'Brug 98-æsker i autofyld',
-        allow28Aria: 'Brug 28-æsker i autofyld',
-        labels: {
-          start: 'Startbeholdning',
-          inn: 'Antal IND',
-          ut: 'Antal UD',
-          kassert: 'Antal KASSERET',
-          rest: 'Restbeholdning'
-        },
-        summary: {
-          rest: 'RESTBEHOLDNING',
-          theoretical: 'RESTBEHOLDNING TEORETISK',
-          difference: 'FORSKEL'
-        }
       }
     }
   },
@@ -483,6 +407,11 @@ const LANGUAGE_DATA_15 = {
       clearButton: 'Tyhjennä',
       clearAria: 'Tyhjennä kaikki valinnat',
       updateNotice: '🔄 NurseCalc päivittyy...',
+      shareNotification: {
+        message: 'Käytä Jaa-toimintoa lähettääksesi tämän työkalun ystäville. Tallentaaksesi sen: {instructions}',
+        shareButton: 'Jaa',
+        cancelButton: 'Peruuta'
+      },
       settings: {
         title: 'Asetukset',
         description: 'Valitse tämän laskurin käyttämä kieli.',
@@ -505,28 +434,6 @@ const LANGUAGE_DATA_15 = {
       footer: {
         disclaimerHtml: `<strong>Vastuuvapauslauseke</strong><br />Tämä sivusto ei ole CE-merkitty eikä se ole lääkinnällinen laite.<br />Laskurit eivät ole validoituja ja niissä voi olla virheitä.<br />Niitä ei saa käyttää potilaskohtaisiin päätöksiin — ne on tarkoitettu vain koulutukseen ja yleiseen ohjaukseen.<br />Tarkista tulokset aina itse ja varmista ne virallisten ohjeiden, valmisteyhteenvedon ja kliinisen harkinnan avulla.<br />Käytät palvelua täysin omalla vastuullasi.<br />`,
         copyrightHtml: '&copy; 2025 Andrew S. Louka'
-      },
-      newPage: {
-        openButton: 'Auditointi',
-        title: 'Auditointi',
-        closeAria: 'Sulje auditointinäkymä',
-        quickInputPlaceholder: 'Tablettien määrä',
-        quickInputAria: 'Nopea kokonaismäärän syöttö',
-        quickAvailabilityAria: 'Käytettävät pakkauskoot',
-        allow98Aria: 'Käytä 98 pakkauksia automaattitäytössä',
-        allow28Aria: 'Käytä 28 pakkauksia automaattitäytössä',
-        labels: {
-          start: 'Alkusaldo',
-          inn: 'Määrä SISÄÄN',
-          ut: 'Määrä ULOS',
-          kassert: 'Määrä HÄVITETTY',
-          rest: 'Jäännössaldo'
-        },
-        summary: {
-          rest: 'JÄÄNNÖSSALDO',
-          theoretical: 'JÄÄNNÖSSALDO TEOREETTINEN',
-          difference: 'EROTUS'
-        }
       }
     }
   },
@@ -556,6 +463,11 @@ const LANGUAGE_DATA_15 = {
       clearButton: 'Restablecer',
       clearAria: 'Restablecer todos los conteos',
       updateNotice: '🔄 NurseCalc se está actualizando...',
+      shareNotification: {
+        message: 'Usa Compartir para enviar esta herramienta a tus amigos. Para guardarla: {instructions}',
+        shareButton: 'Compartir',
+        cancelButton: 'Cancelar'
+      },
       settings: {
         title: 'Configuración',
         description: 'Elige el idioma que quieres usar en esta calculadora.',
@@ -578,28 +490,6 @@ const LANGUAGE_DATA_15 = {
       footer: {
         disclaimerHtml: `<strong>Aviso legal</strong><br />Este sitio no tiene marcado CE y no es un dispositivo médico.<br />Las calculadoras no están validadas y pueden contener errores.<br />No deben utilizarse para decisiones específicas de pacientes — son solo para formación y orientación general.<br />Comprueba siempre los resultados por tu cuenta y contrástalos con las guías oficiales, la información del producto y tu juicio clínico.<br />Usas este servicio bajo tu propia responsabilidad.<br />`,
         copyrightHtml: '&copy; 2025 Andrew S. Louka'
-      },
-      newPage: {
-        openButton: 'Auditoría',
-        title: 'Auditoría',
-        closeAria: 'Cerrar capa de auditoría',
-        quickInputPlaceholder: 'N. tabletas',
-        quickInputAria: 'Entrada rápida del total',
-        quickAvailabilityAria: 'Tamaños de caja disponibles',
-        allow98Aria: 'Usar cajas de 98 en autocompletar',
-        allow28Aria: 'Usar cajas de 28 en autocompletar',
-        labels: {
-          start: 'Stock inicial',
-          inn: 'Cantidad ENTRADA',
-          ut: 'Cantidad SALIDA',
-          kassert: 'Cantidad DESECHADA',
-          rest: 'Stock restante'
-        },
-        summary: {
-          rest: 'STOCK RESTANTE',
-          theoretical: 'STOCK RESTANTE TEÓRICO',
-          difference: 'DIFERENCIA'
-        }
       }
     }
   },
@@ -629,6 +519,11 @@ const LANGUAGE_DATA_15 = {
       clearButton: 'Réinitialiser',
       clearAria: 'Réinitialiser tous les comptages',
       updateNotice: '🔄 NurseCalc est en cours de mise à jour...',
+      shareNotification: {
+        message: 'Utilisez Partager pour envoyer cet outil à vos amis. Pour l\'enregistrer : {instructions}',
+        shareButton: 'Partager',
+        cancelButton: 'Annuler'
+      },
       settings: {
         title: 'Paramètres',
         description: 'Choisissez la langue à utiliser pour cette calculatrice.',
@@ -651,28 +546,6 @@ const LANGUAGE_DATA_15 = {
       footer: {
         disclaimerHtml: `<strong>Avertissement</strong><br />Ce site n'est pas marqué CE et n'est pas un dispositif médical.<br />Les calculateurs ne sont pas validés et peuvent contenir des erreurs.<br />Ils ne doivent pas être utilisés pour des décisions propres à un patient — ils sont uniquement destinés à la formation et à l'orientation générale.<br />Vérifiez toujours les résultats vous-même et confirmez-les avec les recommandations officielles, les informations produit et votre jugement clinique.<br />Vous utilisez ce service entièrement à vos risques et périls.<br />`,
         copyrightHtml: '&copy; 2025 Andrew S. Louka'
-      },
-      newPage: {
-        openButton: 'Audit',
-        title: 'Audit',
-        closeAria: 'Fermer la couche d\'audit',
-        quickInputPlaceholder: 'Nb comprimés',
-        quickInputAria: 'Saisie rapide du total',
-        quickAvailabilityAria: 'Tailles de boîte disponibles',
-        allow98Aria: 'Utiliser les boîtes de 98 en remplissage auto',
-        allow28Aria: 'Utiliser les boîtes de 28 en remplissage auto',
-        labels: {
-          start: 'Stock initial',
-          inn: 'Nombre ENTRÉE',
-          ut: 'Nombre SORTIE',
-          kassert: 'Nombre JETÉ',
-          rest: 'Stock restant'
-        },
-        summary: {
-          rest: 'STOCK RESTANT',
-          theoretical: 'STOCK RESTANT THÉORIQUE',
-          difference: 'ÉCART'
-        }
       }
     }
   },
@@ -702,6 +575,11 @@ const LANGUAGE_DATA_15 = {
       clearButton: 'Azzera',
       clearAria: 'Azzera tutti i conteggi',
       updateNotice: '🔄 NurseCalc è in aggiornamento...',
+      shareNotification: {
+        message: 'Usa Condividi per inviare questo strumento agli amici. Per salvarlo: {instructions}',
+        shareButton: 'Condividi',
+        cancelButton: 'Annulla'
+      },
       settings: {
         title: 'Impostazioni',
         description: 'Scegli la lingua da usare per questa calcolatrice.',
@@ -724,28 +602,6 @@ const LANGUAGE_DATA_15 = {
       footer: {
         disclaimerHtml: `<strong>Avvertenza</strong><br />Questo sito non ha marcatura CE e non è un dispositivo medico.<br />Le calcolatrici non sono validate e possono contenere errori.<br />Non devono essere utilizzate per decisioni specifiche sui pazienti — sono solo per formazione e orientamento generale.<br />Controlla sempre personalmente i risultati e confermali con le linee guida ufficiali, le informazioni sul prodotto e il giudizio clinico.<br />L'uso del servizio avviene interamente a tuo rischio.<br />`,
         copyrightHtml: '&copy; 2025 Andrew S. Louka'
-      },
-      newPage: {
-        openButton: 'Audit',
-        title: 'Audit',
-        closeAria: 'Chiudi livello audit',
-        quickInputPlaceholder: 'N. compresse',
-        quickInputAria: 'Inserimento rapido totale',
-        quickAvailabilityAria: 'Formati scatola disponibili',
-        allow98Aria: 'Usa scatole da 98 nel riempimento automatico',
-        allow28Aria: 'Usa scatole da 28 nel riempimento automatico',
-        labels: {
-          start: 'Giacenza iniziale',
-          inn: 'Numero ENTRATA',
-          ut: 'Numero USCITA',
-          kassert: 'Numero SCARTATO',
-          rest: 'Giacenza residua'
-        },
-        summary: {
-          rest: 'GIACENZA RESIDUA',
-          theoretical: 'GIACENZA RESIDUA TEORICA',
-          difference: 'DIFFERENZA'
-        }
       }
     }
   },
@@ -775,6 +631,11 @@ const LANGUAGE_DATA_15 = {
       clearButton: 'Zurücksetzen',
       clearAria: 'Alle Zählungen zurücksetzen',
       updateNotice: '🔄 NurseCalc wird aktualisiert...',
+      shareNotification: {
+        message: 'Verwenden Sie Teilen, um dieses Tool an Freunde zu senden. Um es zu speichern: {instructions}',
+        shareButton: 'Teilen',
+        cancelButton: 'Abbrechen'
+      },
       settings: {
         title: 'Einstellungen',
         description: 'Wähle die Sprache für diesen Rechner.',
@@ -797,28 +658,6 @@ const LANGUAGE_DATA_15 = {
       footer: {
         disclaimerHtml: `<strong>Haftungsausschluss</strong><br />Diese Website ist nicht CE-gekennzeichnet und kein Medizinprodukt.<br />Die Rechner sind nicht validiert und können Fehler enthalten.<br />Sie dürfen nicht für patientenspezifische Entscheidungen verwendet werden — sie dienen nur zu Schulungszwecken und als allgemeine Orientierung.<br />Prüfe die Ergebnisse stets selbst und vergleiche sie mit offiziellen Richtlinien, Produktinformationen und deinem klinischen Urteil.<br />Die Nutzung erfolgt vollständig auf eigenes Risiko.<br />`,
         copyrightHtml: '&copy; 2025 Andrew S. Louka'
-      },
-      newPage: {
-        openButton: 'Audit',
-        title: 'Audit',
-        closeAria: 'Audit-Ebene schließen',
-        quickInputPlaceholder: 'Anz. Tabletten',
-        quickInputAria: 'Schnelleingabe Gesamtmenge',
-        quickAvailabilityAria: 'Verfügbare Packungsgrößen',
-        allow98Aria: '98er-Packungen im Autofill verwenden',
-        allow28Aria: '28er-Packungen im Autofill verwenden',
-        labels: {
-          start: 'Anfangsbestand',
-          inn: 'Anzahl EIN',
-          ut: 'Anzahl AUS',
-          kassert: 'Anzahl VERWORFEN',
-          rest: 'Restbestand'
-        },
-        summary: {
-          rest: 'RESTBESTAND',
-          theoretical: 'RESTBESTAND THEORETISCH',
-          difference: 'DIFFERENZ'
-        }
       }
     }
   }
@@ -826,86 +665,52 @@ const LANGUAGE_DATA_15 = {
 
 let currentLanguage15 = DEFAULT_LANGUAGE_15;
 let integerFormatter15 = new Intl.NumberFormat(LANGUAGE_DATA_15[DEFAULT_LANGUAGE_15].locale, { maximumFractionDigits: 0 });
-let decimalFormatter15 = new Intl.NumberFormat(LANGUAGE_DATA_15[DEFAULT_LANGUAGE_15].locale, { maximumFractionDigits: 2 });
+let shareOverlayOpenedAt = 0;
 
+async function tryHostShare(payload) {
+  if (!window.top || window.top === window) return false;
+  const topNavigator = window.top.navigator;
+  if (topNavigator && typeof topNavigator.share === 'function') {
+    try {
+      await topNavigator.share(payload);
+      return true;
+    } catch (err) {
+      if (err && (err.name === 'AbortError' || err.name === 'NotAllowedError')) {
+        return true;
+      }
+      console.warn('Oxyaudit host navigator.share failed:', err);
+    }
+  }
+  try {
+    window.top.postMessage({ type: 'oxy-share-request', payload }, '*');
+    return true;
+  } catch (err) {
+    console.warn('Oxyaudit unable to postMessage host for sharing:', err);
+  }
+  return false;
+}
+
+// Mark as embedded when shown inside index.html's iframe
+if (window.top !== window.self) {
+  document.documentElement.classList.add('embedded');
+  document.addEventListener('DOMContentLoaded', () => {
+    document.body.classList.add('embedded');
+  });
+}
+
+
+
+// FUNCTIONS START HERE
 function getLangData15() {
   return LANGUAGE_DATA_15[currentLanguage15] || LANGUAGE_DATA_15[DEFAULT_LANGUAGE_15];
 }
 
 function createNumberFormatters15(locale) {
   integerFormatter15 = new Intl.NumberFormat(locale, { maximumFractionDigits: 0 });
-  decimalFormatter15 = new Intl.NumberFormat(locale, { maximumFractionDigits: 2 });
 }
 
 function formatInt15(value) {
   return integerFormatter15.format(value).replace(/[\u00A0\u202F]/g, ' ');
-}
-
-function formatDecimal15(value) {
-  const safeValue = Math.abs(value) < 1e-9 ? 0 : value;
-  return decimalFormatter15.format(safeValue).replace(/[\u00A0\u202F]/g, ' ');
-}
-
-function getNewPageStrings15(langData) {
-  const newPageStrings = langData?.strings?.newPage || {};
-  const labels = newPageStrings.labels || {};
-  const summary = newPageStrings.summary || {};
-  return {
-    openButton: newPageStrings.openButton || NEW_PAGE_STRINGS_15.openButton,
-    title: newPageStrings.title || NEW_PAGE_STRINGS_15.title,
-    closeAria: newPageStrings.closeAria || NEW_PAGE_STRINGS_15.closeAria,
-    quickInputPlaceholder: newPageStrings.quickInputPlaceholder || NEW_PAGE_STRINGS_15.quickInputPlaceholder,
-    quickInputAria: newPageStrings.quickInputAria || NEW_PAGE_STRINGS_15.quickInputAria,
-    quickAvailabilityAria: newPageStrings.quickAvailabilityAria || NEW_PAGE_STRINGS_15.quickAvailabilityAria,
-    allow98Aria: newPageStrings.allow98Aria || NEW_PAGE_STRINGS_15.allow98Aria,
-    allow28Aria: newPageStrings.allow28Aria || NEW_PAGE_STRINGS_15.allow28Aria,
-    labels: {
-      start: labels.start || NEW_PAGE_STRINGS_15.labels.start,
-      inn: labels.inn || NEW_PAGE_STRINGS_15.labels.inn,
-      ut: labels.ut || NEW_PAGE_STRINGS_15.labels.ut,
-      kassert: labels.kassert || NEW_PAGE_STRINGS_15.labels.kassert,
-      rest: labels.rest || NEW_PAGE_STRINGS_15.labels.rest
-    },
-    summary: {
-      rest: summary.rest || NEW_PAGE_STRINGS_15.summary.rest,
-      theoretical: summary.theoretical || NEW_PAGE_STRINGS_15.summary.theoretical,
-      difference: summary.difference || NEW_PAGE_STRINGS_15.summary.difference
-    }
-  };
-}
-
-function applyNewPageText15(langData) {
-  const newPage = getNewPageStrings15(langData);
-  if (newPageOpenButton) newPageOpenButton.textContent = newPage.openButton;
-  if (quickTotalInput) {
-    quickTotalInput.setAttribute("placeholder", newPage.quickInputPlaceholder);
-    quickTotalInput.setAttribute("aria-label", newPage.quickInputAria);
-    quickTotalInput.setAttribute("title", newPage.quickInputAria);
-  }
-  if (quickTotalOptionsGroup) {
-    quickTotalOptionsGroup.setAttribute("aria-label", newPage.quickAvailabilityAria);
-  }
-  if (quickAllow98Button) {
-    quickAllow98Button.setAttribute("aria-label", newPage.allow98Aria);
-    quickAllow98Button.setAttribute("title", newPage.allow98Aria);
-  }
-  if (quickAllow28Button) {
-    quickAllow28Button.setAttribute("aria-label", newPage.allow28Aria);
-    quickAllow28Button.setAttribute("title", newPage.allow28Aria);
-  }
-  if (newLayerTitleEl) newLayerTitleEl.textContent = newPage.title;
-  if (newLayerCloseButton) {
-    newLayerCloseButton.setAttribute("aria-label", newPage.closeAria);
-    newLayerCloseButton.setAttribute("title", newPage.closeAria);
-  }
-  if (newLayerLabelStart) newLayerLabelStart.textContent = newPage.labels.start;
-  if (newLayerLabelInn) newLayerLabelInn.textContent = newPage.labels.inn;
-  if (newLayerLabelUt) newLayerLabelUt.textContent = newPage.labels.ut;
-  if (newLayerLabelKassert) newLayerLabelKassert.textContent = newPage.labels.kassert;
-  if (newLayerLabelRest) newLayerLabelRest.textContent = newPage.labels.rest;
-  if (newLayerSummaryLabelRest) newLayerSummaryLabelRest.textContent = newPage.summary.rest;
-  if (newLayerSummaryLabelTheoretical) newLayerSummaryLabelTheoretical.textContent = newPage.summary.theoretical;
-  if (newLayerSummaryLabelDifference) newLayerSummaryLabelDifference.textContent = newPage.summary.difference;
 }
 
 function applyFooterText15(langData) {
@@ -918,6 +723,97 @@ function applyFooterText15(langData) {
   const copyright = document.getElementById('footer-copyright');
   if (copyright && footerStrings.copyrightHtml) {
     copyright.innerHTML = footerStrings.copyrightHtml;
+  }
+}
+
+function showShareOverlay() {
+  if (!shareOverlay) return;
+  shareOverlay.classList.add('visible');
+  shareOverlay.removeAttribute('aria-hidden');
+  shareOverlayShare?.focus();
+  document.body.classList.add('share-overlay-visible');
+  shareOverlayOpenedAt = Date.now();
+}
+
+function hideShareOverlay() {
+  if (!shareOverlay) return;
+  shareOverlay.classList.remove('visible');
+  shareOverlay.setAttribute('aria-hidden', 'true');
+  document.body.classList.remove('share-overlay-visible');
+  shareButton?.focus();
+}
+
+function isIOSPlatform() {
+  const ua = navigator.userAgent || navigator.vendor || window.opera || '';
+  const platform = navigator.platform || '';
+  const isIOSDevice = /iPad|iPhone|iPod/.test(ua);
+  const isMacTouch = platform === 'MacIntel' && navigator.maxTouchPoints > 1;
+  return isIOSDevice || isMacTouch;
+}
+
+function getAddToHomeInstructions(locale) {
+  const key = locale && ADD_TO_HOME_INSTRUCTIONS[locale] ? locale : 'en-GB';
+  const entry = ADD_TO_HOME_INSTRUCTIONS[key] || ADD_TO_HOME_INSTRUCTIONS['en-GB'];
+  const channel = isIOSPlatform() ? 'ios' : 'android';
+  return entry[channel] || entry.ios || entry.android || '';
+}
+
+function formatShareMessage(message, instructions) {
+  const base = message || DEFAULT_SHARE_MESSAGE;
+  if (base.includes(SHARE_INSTRUCTION_PLACEHOLDER)) {
+    return base.replace(SHARE_INSTRUCTION_PLACEHOLDER, instructions || '');
+  }
+  if (instructions) {
+    return `${base} ${instructions}`;
+  }
+  return base;
+}
+
+function buildSharePayload() {
+  return {
+    url: getShareUrl()
+  };
+}
+
+function getShareUrl() {
+  try {
+    const url = new URL(window.location.href);
+    url.search = '';
+    url.hash = '';
+    let path = url.pathname || '/';
+    path = path.replace(/calc15\.html?\/?$/i, '/');
+    path = path.replace(/\.html?\/?$/i, '/');
+    path = path.replace(/\/+/g, '/');
+    if (!path.endsWith('/')) {
+      path += '/';
+    }
+    if (path === '//') {
+      path = '/';
+    }
+    url.pathname = path;
+    return url.toString();
+  } catch (_) {
+    return 'https://louka.net/oxyaudit/';
+  }
+}
+
+async function tryNativeShare() {
+  const payload = buildSharePayload();
+  if (await tryHostShare(payload)) {
+    return true;
+  }
+  if (!navigator.share || typeof navigator.share !== 'function') {
+    return false;
+  }
+  try {
+    await navigator.share(payload);
+    return true;
+  } catch (err) {
+    if (err && (err.name === 'AbortError' || err.name === 'NotAllowedError')) {
+      return true;
+    }
+    console.warn('Oxyaudit share failed:', err);
+    return false;
   }
 }
 
@@ -952,6 +848,7 @@ function applyStaticText15(langData) {
   document.title = strings.pageTitle;
   document.documentElement.setAttribute('lang', langData.htmlLang);
   if (calcHeadingEl) calcHeadingEl.textContent = strings.heading;
+  if (appbarTitle) appbarTitle.textContent = strings.heading;
   if (resultsTitleEl) resultsTitleEl.textContent = strings.resultsTitle;
   if (labelBox98) labelBox98.textContent = strings.labels.box98;
   if (labelBox28) labelBox28.textContent = strings.labels.box28;
@@ -964,6 +861,21 @@ function applyStaticText15(langData) {
   if (updateNoticeEl && strings.updateNotice) {
     updateNoticeEl.textContent = strings.updateNotice;
   }
+  const shareStrings = strings.shareNotification || {};
+  const shareMessage = formatShareMessage(shareStrings.message || DEFAULT_SHARE_MESSAGE, getAddToHomeInstructions(langData.locale));
+  if (shareOverlayText) {
+    shareOverlayText.textContent = shareMessage;
+  }
+  if (shareOverlayShare) {
+    const shareLabel = shareStrings.shareButton || 'Share...';
+    shareOverlayShare.textContent = shareLabel;
+    shareOverlayShare.setAttribute('aria-label', shareLabel);
+  }
+  if (shareOverlayCancel) {
+    const cancelLabel = shareStrings.cancelButton || 'Cancel';
+    shareOverlayCancel.textContent = cancelLabel;
+    shareOverlayCancel.setAttribute('aria-label', cancelLabel);
+  }
 
   document.querySelectorAll('[data-aria-key]').forEach((el) => {
     const key = el.getAttribute('data-aria-key');
@@ -972,7 +884,6 @@ function applyStaticText15(langData) {
     }
   });
 
-  applyNewPageText15(langData);
   updateSupplementaryHeadings15(langData);
   applyFooterText15(langData);
 }
@@ -1023,247 +934,11 @@ let selected98 = 0;
 let selected28 = 0;
 let selectedTrays = 0;
 let selectedExtra = 0;
-let quickAllow98 = true;
-let quickAllow28 = true;
-let clearQuickInputOnFocus15 = false;
 
 // === 3.5 SCROLL FUNCTION ===
 // Define scroll target with "id"
 function scrollCalculatorIntoView() {
   // no-op: keep viewport stable after interactions
-}
-
-function sanitizeWholeInput15(value) {
-  return (value || "").replace(/[^\d]/g, "");
-}
-
-function setSelectedToggleValue15(container, value) {
-  if (!container) return;
-  const buttons = container.querySelectorAll(".toggle-button");
-  buttons.forEach((btn) => btn.classList.remove("selected"));
-  if (value <= 0) return;
-  buttons.forEach((btn) => {
-    const btnValue = Number.parseInt(btn.dataset.value || "0", 10);
-    if (btnValue === value) {
-      btn.classList.add("selected");
-    }
-  });
-}
-
-function setQuickAllowButtonState15(button, isActive) {
-  if (!button) return;
-  button.classList.toggle("selected", isActive);
-  button.setAttribute("aria-pressed", isActive ? "true" : "false");
-}
-
-function shouldRecalculateFromQuickInput15() {
-  if (!quickTotalInput) return false;
-  return sanitizeWholeInput15(quickTotalInput.value).length > 0;
-}
-
-function toggleQuickAllow15(kind) {
-  if (kind === "98") {
-    quickAllow98 = !quickAllow98;
-    setQuickAllowButtonState15(quickAllow98Button, quickAllow98);
-  } else if (kind === "28") {
-    quickAllow28 = !quickAllow28;
-    setQuickAllowButtonState15(quickAllow28Button, quickAllow28);
-  }
-
-  if (shouldRecalculateFromQuickInput15()) {
-    handleQuickTotalInput15();
-  }
-}
-
-function hideResultPanels15() {
-  resultDiv.innerHTML = "";
-  calculationBody.innerHTML = "";
-  calculationHeader.style.display = "none";
-  calculationBody.style.display = "none";
-  resultBox.style.display = "none";
-  if (resultDivider) resultDivider.style.display = "none";
-  if (clearContainer) clearContainer.style.display = "none";
-}
-
-function clearSelections15({ clearQuickInput = false } = {}) {
-  selected98 = 0;
-  selected28 = 0;
-  selectedTrays = 0;
-  selectedExtra = 0;
-  document
-    .querySelectorAll(".toggle-button")
-    .forEach((btn) => btn.classList.remove("selected"));
-  hideResultPanels15();
-  if (clearQuickInput && quickTotalInput) {
-    quickTotalInput.value = "";
-    clearQuickInputOnFocus15 = false;
-  }
-}
-
-function applyAutoSelection15(selection) {
-  selected98 = selection.box98;
-  selected28 = selection.box28;
-  selectedTrays = selection.trays;
-  selectedExtra = selection.extra;
-  setSelectedToggleValue15(box98Container, selection.box98);
-  setSelectedToggleValue15(box28Container, selection.box28);
-  setSelectedToggleValue15(trayContainer, selection.trays);
-  setSelectedToggleValue15(extraTabletsContainer, selection.extra);
-  calculateTotalTablets();
-}
-
-function isBetterSelection15(candidate, current) {
-  if (!quickAllow98 && quickAllow28) {
-    if (candidate.box28 !== current.box28) return candidate.box28 > current.box28;
-    if (candidate.extra !== current.extra) return candidate.extra < current.extra;
-    if (candidate.trays !== current.trays) return candidate.trays < current.trays;
-    return false;
-  }
-
-  if (quickAllow98 && !quickAllow28) {
-    if (candidate.box98 !== current.box98) return candidate.box98 > current.box98;
-    if (candidate.extra !== current.extra) return candidate.extra < current.extra;
-    if (candidate.trays !== current.trays) return candidate.trays < current.trays;
-    return false;
-  }
-
-  if (candidate.box98 !== current.box98) return candidate.box98 > current.box98;
-  if (candidate.box28 !== current.box28) return candidate.box28 < current.box28;
-  if (candidate.extra !== current.extra) return candidate.extra < current.extra;
-  if (candidate.trays !== current.trays) return candidate.trays < current.trays;
-  return false;
-}
-
-function findBestSelectionForTotal15(total) {
-  if (!Number.isInteger(total) || total < 0) return null;
-  let best = null;
-  const maxBox98 = quickAllow98 ? MAX_98_BOXES : 0;
-  const maxBox28 = quickAllow28 ? MAX_28_BOXES : 0;
-
-  for (let box98 = 0; box98 <= maxBox98; box98 += 1) {
-    for (let box28 = 0; box28 <= maxBox28; box28 += 1) {
-      for (let trays = 0; trays <= MAX_TRAYS; trays += 1) {
-        const subtotal = box98 * 98 + box28 * 28 + trays * TABLETS_PER_TRAY;
-        const extra = total - subtotal;
-        if (extra < 0 || extra > MAX_EXTRA_TABLETS) continue;
-        const candidate = { box98, box28, trays, extra };
-        if (!best || isBetterSelection15(candidate, best)) {
-          best = candidate;
-        }
-      }
-    }
-  }
-
-  return best;
-}
-
-function handleQuickTotalInput15() {
-  if (!quickTotalInput) return;
-  const sanitized = sanitizeWholeInput15(quickTotalInput.value);
-  if (quickTotalInput.value !== sanitized) {
-    quickTotalInput.value = sanitized;
-  }
-
-  if (!sanitized) {
-    clearSelections15();
-    return;
-  }
-
-  const parsedTotal = Number.parseInt(sanitized, 10);
-  if (!Number.isFinite(parsedTotal)) {
-    clearSelections15();
-    return;
-  }
-
-  const bestSelection = findBestSelectionForTotal15(parsedTotal);
-  if (!bestSelection) {
-    clearSelections15();
-    return;
-  }
-
-  applyAutoSelection15(bestSelection);
-}
-
-function sanitizeDecimalInput15(value) {
-  let sanitized = (value || "").replace(/,/g, ".").replace(/[^\d.]/g, "");
-  const firstDotIdx = sanitized.indexOf(".");
-  if (firstDotIdx !== -1) {
-    sanitized =
-      sanitized.slice(0, firstDotIdx + 1) +
-      sanitized.slice(firstDotIdx + 1).replace(/\./g, "");
-  }
-  return sanitized;
-}
-
-function parseDecimalInput15(inputEl) {
-  if (!inputEl) return null;
-  const raw = (inputEl.value || "").trim().replace(",", ".");
-  if (!raw || raw === ".") return null;
-  const parsed = Number(raw);
-  return Number.isFinite(parsed) ? parsed : null;
-}
-
-function updateNewLayerSummary15() {
-  if (!newLayerSummaryContainer) return;
-  const start = parseDecimalInput15(newLayerInputs.start);
-  const innInput = parseDecimalInput15(newLayerInputs.inn);
-  const ut = parseDecimalInput15(newLayerInputs.ut);
-  const kassertInput = parseDecimalInput15(newLayerInputs.kassert);
-  const rest = parseDecimalInput15(newLayerInputs.rest);
-  const inn = innInput === null ? 0 : innInput;
-  const kassert = kassertInput === null ? 0 : kassertInput;
-
-  const hasRequiredValues = [start, ut, rest].every((value) => value !== null);
-  if (!hasRequiredValues) {
-    newLayerSummaryContainer.hidden = true;
-    return;
-  }
-
-  const theoretical = start + inn - (ut + kassert);
-  const difference = theoretical - rest;
-
-  if (newLayerSummaryRest) {
-    newLayerSummaryRest.textContent = formatDecimal15(rest);
-  }
-  if (newLayerSummaryTheoretical) {
-    newLayerSummaryTheoretical.textContent = formatDecimal15(theoretical);
-  }
-  if (newLayerSummaryDifference) {
-    newLayerSummaryDifference.textContent = formatDecimal15(difference);
-  }
-  newLayerSummaryContainer.hidden = false;
-}
-
-function setNewLayerOpen15(isOpen) {
-  if (!newLayer) return;
-  if (isOpen) {
-    newLayer.hidden = false;
-    newLayer.setAttribute("aria-hidden", "false");
-    document.body.classList.add("calc15-new-layer-open");
-    newLayerInputs.start?.focus();
-    return;
-  }
-  newLayer.hidden = true;
-  newLayer.setAttribute("aria-hidden", "true");
-  document.body.classList.remove("calc15-new-layer-open");
-}
-
-function bindNewLayerInputs15() {
-  Object.values(newLayerInputs).forEach((inputEl) => {
-    if (!inputEl) return;
-    inputEl.addEventListener("input", (event) => {
-      const input = event.target;
-      const sanitized = sanitizeDecimalInput15(input.value);
-      if (input.value !== sanitized) {
-        input.value = sanitized;
-      }
-      updateNewLayerSummary15();
-    });
-    inputEl.addEventListener("blur", () => {
-      inputEl.value = sanitizeDecimalInput15(inputEl.value);
-      updateNewLayerSummary15();
-    });
-  });
 }
 
 // === 4. BUTTON GROUP HANDLER ===
@@ -1324,8 +999,71 @@ function calculateTotalTablets() {
 }
 
 // === 6. RESET FUNCTIONALITY ===
+// --- Oxyaudit: show the yellow update banner immediately (no dependencies) ---
+function oxyShowReloadBannerNow() {
+  try {
+    // Prefer the updater's banner if present
+    if (window.__oxyUpdate && typeof window.__oxyUpdate._forceShow === 'function') {
+      window.__oxyUpdate._forceShow();
+      return;
+    }
+
+    // Fallback: paint our own banner, same ID and look
+    var n = document.getElementById('update-notice');
+    if (!n) {
+      n = document.createElement('div');
+      n.id = 'update-notice';
+      document.body.appendChild(n);
+    }
+    const msg = (getLangData15()?.strings?.updateNotice) || '🔄 App is being updated...';
+    n.textContent = msg;
+
+    // Ensure it's visible even if any CSS tries to hide it
+    n.classList.add('visible');
+    n.style.display = 'block';
+    n.style.position = 'fixed';
+    n.style.left = '0';
+    n.style.right = '0';
+    n.style.top = 'calc(env(safe-area-inset-top, 0px) + var(--appbar-height, 56px) + .5rem)';
+    n.style.margin = '0 auto';
+    n.style.width = 'min(700px, calc(100% - 1.5rem))';
+    n.style.zIndex = '99999';
+    n.style.cursor = 'pointer';
+    n.style.transform = 'none';
+
+    // Basic visual safety if CSS sheet failed to load
+    n.style.background = n.style.background || '#ffcc33';
+    n.style.color = n.style.color || '#333';
+    n.style.fontWeight = n.style.fontWeight || '600';
+    n.style.textAlign = n.style.textAlign || 'center';
+    n.style.padding = n.style.padding || '0.8rem 1rem';
+    n.style.border = n.style.border || '0.5px solid #f0c000';
+    n.style.borderRadius = n.style.borderRadius || '8px';
+    n.style.boxShadow = n.style.boxShadow || '0 4px 10px rgba(0,0,0,.25)';
+  } catch (_) { /* ignore */ }
+}
+
+// Make available to console and other scripts
+window.oxyShowReloadBannerNow = oxyShowReloadBannerNow;
+
+
 function resetAll() {
-  clearSelections15({ clearQuickInput: true });
+  selected98 = 0;
+  selected28 = 0;
+  selectedTrays = 0;
+  selectedExtra = 0;
+
+  document
+    .querySelectorAll(".toggle-button")
+    .forEach((btn) => btn.classList.remove("selected"));
+
+  resultDiv.innerHTML = "";
+  calculationBody.innerHTML = "";
+  calculationHeader.style.display = "none";
+  calculationBody.style.display = "none";
+  resultBox.style.display = "none";
+  if (resultDivider) resultDivider.style.display = "none";
+  if (clearContainer) clearContainer.style.display = "none";
   if (window.innerWidth < 500) {
     scrollCalculatorIntoView();
   }
@@ -1414,44 +1152,44 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  quickTotalInput?.addEventListener("input", handleQuickTotalInput15);
-  quickTotalInput?.addEventListener("focus", () => {
-    if (!quickTotalInput) return;
-    if (!clearQuickInputOnFocus15) return;
-    if (!quickTotalInput.value) {
-      clearQuickInputOnFocus15 = false;
-      return;
-    }
-    clearQuickInputOnFocus15 = false;
-    quickTotalInput.value = "";
-    clearSelections15();
-  });
-  quickTotalInput?.addEventListener("blur", () => {
-    if (!quickTotalInput) return;
-    quickTotalInput.value = sanitizeWholeInput15(quickTotalInput.value);
-    clearQuickInputOnFocus15 = quickTotalInput.value.length > 0;
-  });
-  quickAllow98Button?.addEventListener("click", () => toggleQuickAllow15("98"));
-  quickAllow28Button?.addEventListener("click", () => toggleQuickAllow15("28"));
-  setQuickAllowButtonState15(quickAllow98Button, quickAllow98);
-  setQuickAllowButtonState15(quickAllow28Button, quickAllow28);
+  const shareOverlayHandler = (event) => {
+    event.preventDefault();
+    showShareOverlay();
+  };
+  shareButton?.addEventListener('click', shareOverlayHandler);
+  shareButton?.addEventListener('touchend', shareOverlayHandler, { passive: false });
+  shareButton?.addEventListener('touchstart', shareOverlayHandler, { passive: false });
 
-  bindNewLayerInputs15();
-  newPageOpenButton?.addEventListener("click", () => setNewLayerOpen15(true));
-  newLayerCloseButton?.addEventListener("click", () => setNewLayerOpen15(false));
-  document.querySelectorAll("[data-calc15-new-layer-close]").forEach((closeTarget) => {
-    closeTarget.addEventListener("click", () => setNewLayerOpen15(false));
+  shareOverlayCancel?.addEventListener('click', (event) => {
+    event.preventDefault();
+    hideShareOverlay();
   });
-  updateNewLayerSummary15();
+
+  shareOverlayShare?.addEventListener('click', async (event) => {
+    event.preventDefault();
+    const shared = await tryNativeShare();
+    if (!shared) {
+      window.alert('Sharing is not available on this browser. Use your browser menu to share or add to your home screen.');
+    }
+    hideShareOverlay();
+  });
+
+  shareOverlay?.addEventListener('click', (event) => {
+    if (event.target === shareOverlay) {
+      if (Date.now() - shareOverlayOpenedAt < 250) return;
+      hideShareOverlay();
+    }
+  });
 
   document.addEventListener('keydown', (event) => {
-    if (event.key !== 'Escape') return;
-    if (newLayer && !newLayer.hidden) {
-      setNewLayerOpen15(false);
-      return;
-    }
-    if (document.body.classList.contains('showing-settings')) {
+    if (event.key === 'Escape' && document.body.classList.contains('showing-settings')) {
       closeSettings15();
+    }
+  });
+
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && shareOverlay?.classList.contains('visible')) {
+      hideShareOverlay();
     }
   });
 
@@ -1464,3 +1202,118 @@ document.addEventListener('DOMContentLoaded', () => {
     observer.observe(footerHolder, { childList: true, subtree: true });
   }
 });
+
+// === App Reset (force fresh load on settings close) =========================
+(function () {
+  const KEY = 'calc15.reloadOnClose';  // same key used by the toggle
+
+  function getFlag() {
+    try { return localStorage.getItem(KEY) === 'true'; } catch (_) { return false; }
+  }
+  function setFlag(v) {
+    const on = !!v;
+    try { localStorage.setItem(KEY, String(on)); } catch (_) { }
+    const cb = document.getElementById('reload-on-close');
+    if (cb) cb.checked = on;
+  }
+
+  // Hard reset routine: unregister SW, wipe caches, then hard reload
+  async function hardReset() {
+    try {
+      if ('serviceWorker' in navigator) {
+        const regs = await navigator.serviceWorker.getRegistrations();
+        await Promise.all(regs.map(r => r.unregister().catch(() => { })));
+      }
+      if (window.caches && caches.keys) {
+        const names = await caches.keys();
+        await Promise.all(names.map(n => caches.delete(n).catch(() => { })));
+      }
+    } catch (_) { /* ignore */ }
+    const u = new URL(window.location.href);
+    u.searchParams.set('reset', Date.now().toString());
+    window.location.replace(u.toString());
+  }
+
+  function showBannerNow() {
+    // Prefer the updater's own banner if available
+    if (window.__oxyUpdate && typeof window.__oxyUpdate._forceShow === 'function') {
+      window.__oxyUpdate._forceShow();
+      return;
+    }
+    // Fallback to calc15’s helper if present
+    if (typeof window.oxyShowReloadBannerNow === 'function') {
+      window.oxyShowReloadBannerNow();
+      return;
+    }
+    // Last-ditch: inline create + show
+    var n = document.getElementById('update-notice');
+    if (!n) { n = document.createElement('div'); n.id = 'update-notice'; document.body.appendChild(n); }
+    const msg = (getLangData15()?.strings?.updateNotice) || '🔄 App is being updated...';
+    n.textContent = msg;
+    n.classList.add('visible');
+    Object.assign(n.style, {
+      display: 'block',
+      position: 'fixed',
+      left: '0', right: '0',
+      top: 'calc(env(safe-area-inset-top, 0px) + var(--appbar-height, 56px) + .5rem)',
+      margin: '0 auto',
+      width: 'min(700px, calc(100% - 1.5rem))',
+      zIndex: '99999',
+      cursor: 'pointer',
+      transform: 'none',
+      background: '#ffcc33',
+      color: '#333',
+      fontWeight: '600',
+      textAlign: 'center',
+      padding: '0.8rem 1rem',
+      border: '0.5px solid #f0c000',
+      borderRadius: '8px',
+      boxShadow: '0 4px 10px rgba(0,0,0,.25)'
+    });
+  }
+
+  function onCloseClick(e) {
+    if (!getFlag()) return;          // slider OFF → do nothing
+    e.preventDefault();
+    e.stopImmediatePropagation();
+
+    // Close the sheet
+    if (typeof window.closeSettings15 === 'function') {
+      window.closeSettings15();
+    }
+
+    // Ensure slider is OFF for next time
+    setFlag(false);
+
+    // Show confirmation banner, allow a paint, then reload once
+    showBannerNow();
+    requestAnimationFrame(() =>
+      requestAnimationFrame(() => {
+        setTimeout(hardResetReload, RELOAD_BANNER_PAUSE_MS);
+      })
+    );
+  }
+
+  function wire() {
+    // Keep the checkbox state in sync with localStorage
+    const cb = document.getElementById('reload-on-close');
+    if (cb) {
+      try { cb.checked = getFlag(); } catch (_) { }
+      cb.addEventListener('change', function () {
+        setFlag(!!this.checked);
+      });
+    }
+
+    // Single authoritative handler on the close “X” button
+    const closeEl = document.getElementById('settings-close');
+    if (!closeEl) return;
+    // Use capture to run before any legacy handlers
+    closeEl.addEventListener('click', onCloseClick, { capture: true });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', wire, { once: true });
+  } else {
+    wire();
+  }
+})();
