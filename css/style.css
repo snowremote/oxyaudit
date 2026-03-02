@@ -1264,3 +1264,50 @@ body.calc15 .calc15-new-summary-value {
   body.calc15 .calc15-new-summary-label,
   body.calc15 .calc15-new-summary-value { font-size: 0.95rem; }
 }
+
+/* === FIX: settings panel is collapsing to 0x0 (calc15) === */
+body.page-calc15 #settings-panel{
+  display: block !important;
+  width: min(700px, calc(100% - 2.5rem)) !important;
+  max-width: 700px !important;
+  height: auto !important;
+  max-height: calc(100vh - (env(safe-area-inset-top, 0px) + var(--appbar-height, 56px) + 1.5rem)) !important;
+  padding: 1.5rem 1rem !important;
+  margin: 0.75rem auto 1rem !important;
+  box-sizing: border-box !important;
+}
+
+body.page-calc15.showing-settings #settings-panel{
+  position: fixed !important;
+  top: calc(env(safe-area-inset-top, 0px) + var(--appbar-height, 56px) + 0.5rem) !important;
+  left: 0 !important;
+  right: 0 !important;
+  z-index: 5000 !important;
+  overflow-y: auto !important;
+}
+
+/* === FIX (iOS/WebKit): Settings panel collapses to 0x0 when fixed in iframe.
+   Force it to render in normal flow for calc15 when settings are open. */
+body.page-calc15.showing-settings #settings-panel{
+  position: static !important;
+  inset: auto !important;
+  top: auto !important;
+  left: auto !important;
+  right: auto !important;
+  bottom: auto !important;
+  width: min(700px, calc(100% - 2.5rem)) !important;
+  max-width: 700px !important;
+  margin: calc(env(safe-area-inset-top, 0px) + var(--appbar-height, 56px) + 0.5rem) auto 1rem !important;
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+  z-index: auto !important;
+  overflow: visible !important;
+  box-sizing: border-box !important;
+}
+
+/* Hide only the calculator card when settings are open */
+body.page-calc15.showing-settings .calculator{
+  display: none !important;
+}

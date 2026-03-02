@@ -7,14 +7,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
     <script>
-      window.APP_VERSION = "20260302-162505";
+      window.APP_VERSION = "20260302-174231";
     </script>
 
     <style>
       /* Keep initial hide to avoid flash-of-unstyled content */
-      body.loading {
-        visibility: hidden;
-      }
+body.loading {
+  opacity: 0;
+}
+body:not(.loading) {
+  opacity: 1;
+  transition: opacity .15s ease;
+}
 
       body.page-calc15 #settings-panel .settings-language-options .setting-row {
         border-bottom: none !important;
@@ -113,7 +117,7 @@
       <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" />
     </noscript>
 
-    <link rel="stylesheet" href="./css/style.css?v=20260302-162505" />
+    <link rel="stylesheet" href="./css/style.css?v=20260302-174231" />
 
     <link rel="manifest" href="./manifest.webmanifest?v=20251002-07" />
 
@@ -227,6 +231,95 @@
   </div>
 </main>
 
+<!-- Settings panel -->
+<section id="settings-panel" style="display: none">
+  <div class="settings-header">
+    <h2 id="settings-title">Settings</h2>
+    <button id="settings-close" aria-label="Close Settings">&times;</button>
+  </div>
+  <p class="settings-description" id="settings-description">Choose your preferred language for this calculator.</p>
+  <div class="settings-form">
+    <fieldset class="settings-language-options">
+      <legend id="settings-language-legend">Language</legend>
+      <div class="setting-row item">
+        <label>
+          <input type="radio" name="calc15-language" value="en-GB" />
+          <span data-language-option="en-GB">English (UK)</span>
+        </label>
+      </div>
+      <div class="setting-row item">
+        <label>
+          <input type="radio" name="calc15-language" value="nb-NO" />
+          <span data-language-option="nb-NO">Norsk (Bokmål)</span>
+        </label>
+      </div>
+      <div class="setting-row item">
+        <label>
+          <input type="radio" name="calc15-language" value="nn-NO" />
+          <span data-language-option="nn-NO">Norsk (Nynorsk)</span>
+        </label>
+      </div>
+      <div class="setting-row item">
+        <label>
+          <input type="radio" name="calc15-language" value="sv-SE" />
+          <span data-language-option="sv-SE">Svenska</span>
+        </label>
+      </div>
+      <div class="setting-row item">
+        <label>
+          <input type="radio" name="calc15-language" value="da-DK" />
+          <span data-language-option="da-DK">Dansk</span>
+        </label>
+      </div>
+      <div class="setting-row item">
+        <label>
+          <input type="radio" name="calc15-language" value="fi-FI" />
+          <span data-language-option="fi-FI">Suomi</span>
+        </label>
+      </div>
+      <div class="setting-row item">
+        <label>
+          <input type="radio" name="calc15-language" value="es-ES" />
+          <span data-language-option="es-ES">Español</span>
+        </label>
+      </div>
+      <div class="setting-row item">
+        <label>
+          <input type="radio" name="calc15-language" value="fr-FR" />
+          <span data-language-option="fr-FR">Français</span>
+        </label>
+      </div>
+      <div class="setting-row item">
+        <label>
+          <input type="radio" name="calc15-language" value="it-IT" />
+          <span data-language-option="it-IT">Italiano</span>
+        </label>
+      </div>
+      <div class="setting-row item">
+        <label>
+          <input type="radio" name="calc15-language" value="de-DE" />
+          <span data-language-option="de-DE">Deutsch</span>
+        </label>
+      </div>
+    </fieldset>
+
+    <fieldset class="settings-reset-options">
+      <legend id="settings-reset-legend">App Reset</legend>
+      <div class="setting-row">
+        <label class="nc-toggle">
+          <input id="reload-on-close" type="checkbox" class="nc-toggle__input" />
+          <span class="nc-toggle__track" aria-hidden="true">
+            <span class="nc-toggle__thumb"></span>
+          </span>
+          <span class="nc-toggle__label">Reset App</span>
+        </label>
+        <div class="small-hint">Forces a hard refresh and cache clear when closing settings panel.</div>
+      </div>
+      <p class="small-hint" id="reload-on-close-hint">Use if app behaves unexpectedly.</p>
+    </fieldset>
+  </div>
+</section>
+
 <section id="calc15-new-layer" class="calc15-new-layer" hidden aria-hidden="true">
       <div class="calc15-new-layer-backdrop" data-calc15-new-layer-close></div>
       <div class="calc15-new-layer-panel" role="dialog" aria-modal="true" aria-labelledby="calc15-new-layer-title">
@@ -273,102 +366,11 @@
           </div>
         </section>
 
-
-
-    <!-- Settings panel -->
-    <section id="settings-panel" style="display: none">
-      <div class="settings-header">
-        <h2 id="settings-title">Settings</h2>
-        <button id="settings-close" aria-label="Close Settings">&times;</button>
-      </div>
-      <p class="settings-description" id="settings-description">Choose your preferred language for this calculator.</p>
-      <div class="settings-form">
-        <fieldset class="settings-language-options">
-          <legend id="settings-language-legend">Language</legend>
-          <div class="setting-row item">
-            <label>
-              <input type="radio" name="calc15-language" value="en-GB" />
-              <span data-language-option="en-GB">English (UK)</span>
-            </label>
-          </div>
-          <div class="setting-row item">
-            <label>
-              <input type="radio" name="calc15-language" value="nb-NO" />
-              <span data-language-option="nb-NO">Norsk (Bokmål)</span>
-            </label>
-          </div>
-          <div class="setting-row item">
-            <label>
-              <input type="radio" name="calc15-language" value="nn-NO" />
-              <span data-language-option="nn-NO">Norsk (Nynorsk)</span>
-            </label>
-          </div>
-          <div class="setting-row item">
-            <label>
-              <input type="radio" name="calc15-language" value="sv-SE" />
-              <span data-language-option="sv-SE">Svenska</span>
-            </label>
-          </div>
-          <div class="setting-row item">
-            <label>
-              <input type="radio" name="calc15-language" value="da-DK" />
-              <span data-language-option="da-DK">Dansk</span>
-            </label>
-          </div>
-          <div class="setting-row item">
-            <label>
-              <input type="radio" name="calc15-language" value="fi-FI" />
-              <span data-language-option="fi-FI">Suomi</span>
-            </label>
-          </div>
-          <div class="setting-row item">
-            <label>
-              <input type="radio" name="calc15-language" value="es-ES" />
-              <span data-language-option="es-ES">Español</span>
-            </label>
-          </div>
-          <div class="setting-row item">
-            <label>
-              <input type="radio" name="calc15-language" value="fr-FR" />
-              <span data-language-option="fr-FR">Français</span>
-            </label>
-          </div>
-          <div class="setting-row item">
-            <label>
-              <input type="radio" name="calc15-language" value="it-IT" />
-              <span data-language-option="it-IT">Italiano</span>
-            </label>
-          </div>
-          <div class="setting-row item">
-            <label>
-              <input type="radio" name="calc15-language" value="de-DE" />
-              <span data-language-option="de-DE">Deutsch</span>
-            </label>
-          </div>
-        </fieldset>
-
-        <fieldset class="settings-reset-options">
-          <legend id="settings-reset-legend">App Reset</legend>
-          <div class="setting-row">
-            <label class="nc-toggle">
-              <input id="reload-on-close" type="checkbox" class="nc-toggle__input" />
-              <span class="nc-toggle__track" aria-hidden="true">
-                <span class="nc-toggle__thumb"></span>
-              </span>
-              <span class="nc-toggle__label">Reset App</span>
-            </label>
-            <div class="small-hint">Forces a hard refresh and cache clear when closing settings panel.</div>
-          </div>
-          <p class="small-hint" id="reload-on-close-hint">Use if app behaves unexpectedly.</p>
-        </fieldset>
-      </div>
-    </section>
-
     <!-- Local footer placeholder (populated by ./js/footer-loader.js) -->
     <div id="footer-placeholder"></div>
 
     <script src="./js/footer-loader.js" defer></script>
-    <script src="./js/calc15.js?v=20260302-162505" defer></script>
+    <script src="./js/calc15.js?v=20260302-174231" defer></script>
 
     <noscript>
       <div style="background: #ffcccc; padding: 1em; border: 1px solid #cc0000; color: #660000; margin: 1em 0">
